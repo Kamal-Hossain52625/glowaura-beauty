@@ -76,58 +76,6 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-xs border-b border-[#F8E8EE]">
-      {/* Top Announcement Bar */}
-      <div className="bg-[#222222] text-white text-xs py-2 px-4 transition-colors">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-4 text-gray-300 text-[11px] sm:text-xs">
-            <span className="flex items-center gap-1.5 text-pink-300 font-medium">
-              <Sparkles className="w-3.5 h-3.5" />
-              {settings.announcement}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] sm:text-xs text-gray-300">
-            <span className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer">
-              <Phone className="w-3 h-3 text-[#E86A92]" />
-              Hotline: {settings.hotline}
-            </span>
-            <span className="text-gray-600">|</span>
-            <button
-              onClick={() => navigateTo('order-tracking')}
-              className="flex items-center gap-1 hover:text-pink-300 transition-colors cursor-pointer"
-            >
-              <Truck className="w-3 h-3" />
-              Track Order
-            </button>
-            <span className="text-gray-600">|</span>
-            {/* Quick Switchers for Reviewers/Users */}
-            <button
-              onClick={() => navigateTo('admin')}
-              className={`flex items-center gap-1 font-medium px-2.5 py-0.5 rounded transition-all cursor-pointer ${
-                activeView === 'admin'
-                  ? 'bg-[#E86A92] text-white shadow-xs font-bold'
-                  : 'bg-zinc-800 text-pink-300 hover:bg-zinc-700'
-              }`}
-              title="Direct link to /admin"
-            >
-              <LayoutDashboard className="w-3 h-3" />
-              Admin Dashboard (/admin)
-            </button>
-            <button
-              onClick={() => navigateTo('laravel-code')}
-              className={`flex items-center gap-1 font-medium px-2 py-0.5 rounded transition-all cursor-pointer ${
-                activeView === 'laravel-code'
-                  ? 'bg-[#E86A92] text-white'
-                  : 'bg-zinc-800 text-emerald-400 hover:bg-zinc-700'
-              }`}
-            >
-              <Code2 className="w-3 h-3" />
-              Laravel 12 Backend
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Header Row */}
       <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-4">
@@ -277,16 +225,6 @@ export const Header: React.FC = () => {
                       <button
                         onClick={() => {
                           setIsAccountDropdownOpen(false);
-                          navigateTo('order-tracking');
-                        }}
-                        className="w-full text-left px-4 py-2 text-xs text-zinc-700 hover:bg-pink-50 hover:text-[#E86A92] flex items-center gap-2 cursor-pointer"
-                      >
-                        <Package className="w-3.5 h-3.5" />
-                        Track Orders
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsAccountDropdownOpen(false);
                           navigateTo('admin');
                         }}
                         className="w-full text-left px-4 py-2 text-xs text-[#E86A92] font-semibold hover:bg-pink-50 flex items-center gap-2 cursor-pointer"
@@ -312,21 +250,22 @@ export const Header: React.FC = () => {
                       <button
                         onClick={() => {
                           setIsAccountDropdownOpen(false);
-                          navigateTo('admin');
+                          navigateTo('account');
                         }}
-                        className="w-full bg-[#E86A92] hover:bg-[#d6577e] text-white text-xs font-bold py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                        className="w-full bg-[#E86A92] hover:bg-[#d6577e] text-white text-xs font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                       >
-                        <LayoutDashboard className="w-3.5 h-3.5" />
-                        Admin Dashboard (/admin or /login)
+                        <Phone className="w-3.5 h-3.5" />
+                        Sign In with Phone (OTP)
                       </button>
                       <button
                         onClick={() => {
                           setIsAccountDropdownOpen(false);
-                          navigateTo('account');
+                          navigateTo('admin');
                         }}
-                        className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold py-2 rounded-lg transition-colors cursor-pointer"
+                        className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold py-2 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                       >
-                        Customer Account (/account)
+                        <LayoutDashboard className="w-3.5 h-3.5" />
+                        Admin Dashboard (/admin)
                       </button>
                     </div>
                   )}
@@ -435,26 +374,16 @@ export const Header: React.FC = () => {
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-[#F8E8EE] bg-white px-4 py-4 space-y-3 animate-in slide-in-from-top-2">
-          <div className="grid grid-cols-2 gap-2 pb-3 border-b border-zinc-100">
+          <div className="pb-3 border-b border-zinc-100">
             <button
               onClick={() => {
-                navigateTo('admin');
+                navigateTo('account');
                 setIsMobileMenuOpen(false);
               }}
-              className="bg-zinc-900 text-white text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5"
+              className="w-full bg-zinc-50 hover:bg-pink-50 text-zinc-700 text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 font-semibold border border-zinc-200"
             >
-              <LayoutDashboard className="w-3.5 h-3.5 text-pink-400" />
-              Admin Panel
-            </button>
-            <button
-              onClick={() => {
-                navigateTo('laravel-code');
-                setIsMobileMenuOpen(false);
-              }}
-              className="bg-emerald-800 text-white text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5"
-            >
-              <Code2 className="w-3.5 h-3.5 text-emerald-300" />
-              Laravel Code
+              <UserIcon className="w-3.5 h-3.5 text-[#E86A92]" />
+              My Account & Orders
             </button>
           </div>
 

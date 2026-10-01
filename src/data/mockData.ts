@@ -1,4 +1,4 @@
-import { Product, Category, Brand, Coupon, Order, Review, StoreSettings, User } from '../types';
+import { Product, Category, Brand, Coupon, Order, Review, StoreSettings, User, AdminAccount } from '../types';
 
 export const INITIAL_SETTINGS: StoreSettings = {
   storeName: "GlowAura Beauty BD",
@@ -1438,6 +1438,31 @@ export const BANGLADESH_DISTRICTS = [
   "Dhaka", "Chattogram", "Sylhet", "Rajshahi", "Khulna", "Barishal", "Rangpur", "Mymensingh",
   "Gazipur", "Narayanganj", "Cumilla", "Bogura", "Cox's Bazar", "Jessore", "Feni", "Brahmanbaria",
   "Tangail", "Faridpur", "Jamalpur", "Pabna", "Sirajganj", "Dinajpur", "Kushtia", "Narsingdi"
+];
+
+export const INITIAL_ADMIN_ACCOUNTS: AdminAccount[] = [
+  {
+    id: "admin-super-1",
+    name: "GlowAura Owner (Super Admin)",
+    email: "admin@glowaurabd.com",
+    password: "password123",
+    role: "super_admin",
+    phone: "01711234567",
+    permissions: ["all"],
+    createdAt: "2026-09-01",
+    isActive: true
+  },
+  {
+    id: "admin-sub-1",
+    name: "Tariqul Islam (Order & Dispatch Manager)",
+    email: "subadmin@glowaurabd.com",
+    password: "password123",
+    role: "sub_admin",
+    phone: "01819283746",
+    permissions: ["orders", "tracking"],
+    createdAt: "2026-09-15",
+    isActive: true
+  }
 ];
 
 export const INITIAL_USER: User = {

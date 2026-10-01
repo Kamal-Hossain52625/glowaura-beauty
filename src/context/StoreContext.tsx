@@ -9,7 +9,9 @@ import {
   Coupon,
   StoreSettings,
   User,
-  OrderStatus
+  OrderStatus,
+  AdminAccount,
+  AdminRole
 } from '../types';
 import {
   PRODUCTS as INITIAL_PRODUCTS_LIST,
@@ -19,7 +21,8 @@ import {
   INITIAL_COUPONS,
   INITIAL_ORDERS,
   INITIAL_REVIEWS,
-  INITIAL_USER
+  INITIAL_USER,
+  INITIAL_ADMIN_ACCOUNTS
 } from '../data/mockData';
 
 export type AppView =
@@ -136,7 +139,23 @@ interface StoreContextType {
 
   // Auth
   login: (email: string, role?: 'customer' | 'admin') => void;
+  loginWithPhone: (phone: string, name?: string) => void;
+  updateUserProfile: (updated: Partial<User>) => void;
   logout: () => void;
+
+  // Admin & Sub-Admin Account Management
+  adminAccounts: AdminAccount[];
+  createSubAdmin: (subAdmin: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+    permissions: string[];
+  }) => { success: boolean; message: string };
+  deleteSubAdmin: (id: string) => { success: boolean; message: string };
+  toggleSubAdminStatus: (id: string) => void;
+  adminLogin: (email: string, password: string) => { success: boolean; message: string; user?: User };
+
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
 }
@@ -290,26 +309,35 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
   });
 
+  const [adminAccounts, setAdminAccounts] = useState<AdminAccount[]>(() => {
+    try {
+      const saved = localStorage.getItem('glowaura_admin_accounts');
+      return saved ? JSON.parse(saved) : INITIAL_ADMIN_ACCOUNTS;
+    } catch {
+      return INITIAL_ADMIN_ACCOUNTS;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('glowaura_admin_accounts', JSON.stringify(adminAccounts));
+  }, [adminAccounts]);
+
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('glowaura_user');
-      const user = saved ? JSON.parse(saved) : INITIAL_USER;
-      if (initialRoute.view === 'admin' && (!user || user.role !== 'admin')) {
-        return {
-          id: user?.id || 'admin-1',
-          name: user?.name || 'Store Manager (Super Admin)',
-          email: user?.email || 'admin@glowaurabd.com',
-          phone: user?.phone || '01711234567',
-          defaultDistrict: user?.defaultDistrict || 'Dhaka',
-          defaultAddress: user?.defaultAddress || 'Gulshan 2, Dhaka, Bangladesh',
-          role: 'admin'
-        };
-      }
-      return user;
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      return INITIAL_USER;
+      return null;
     }
   });
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('glowaura_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('glowaura_user');
+    }
+  }, [currentUser]);
 
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
 
@@ -825,9 +853,137 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast(`Signed in as ${mockUser.name}`, 'success');
   };
 
+  const loginWithPhone = (phone: string, name?: string) => {
+    const formattedPhone = phone.trim();
+    const pastOrder = orders.find((o) => o.customerPhone === formattedPhone);
+    const userName = name?.trim() || (pastOrder ? pastOrder.customerName : 'Glow Member');
+    const district = pastOrder ? pastOrder.district : 'Dhaka';
+    const address = pastOrder ? pastOrder.fullAddress : 'Dhaka, Bangladesh';
+
+    const customerUser: User = {
+      id: `user-${formattedPhone.replace(/\D/g, '') || Date.now()}`,
+      name: userName,
+      email: `${formattedPhone.replace(/\D/g, '')}@mobile.glowaurabd.com`,
+      phone: formattedPhone,
+      defaultDistrict: district,
+      defaultAddress: address,
+      role: 'customer'
+    };
+    setCurrentUser(customerUser);
+    showToast(`Welcome, ${customerUser.name}! Signed in with ${customerUser.phone}`, 'success');
+  };
+
+  const updateUserProfile = (updated: Partial<User>) => {
+    if (currentUser) {
+      const newUser = { ...currentUser, ...updated };
+      setCurrentUser(newUser);
+      showToast('Profile updated successfully.', 'success');
+    }
+  };
+
   const logout = () => {
     setCurrentUser(null);
     showToast('Signed out successfully.', 'info');
+  };
+
+  // Admin and Sub-Admin Email Authentication
+  const adminLogin = (email: string, password: string): { success: boolean; message: string; user?: User } => {
+    const cleanEmail = email.trim().toLowerCase();
+    const account = adminAccounts.find((a) => a.email.toLowerCase() === cleanEmail);
+
+    if (!account) {
+      return { success: false, message: 'Invalid admin email address.' };
+    }
+
+    if (!account.isActive) {
+      return { success: false, message: 'This admin account has been deactivated by Super Admin.' };
+    }
+
+    if (account.password !== password) {
+      return { success: false, message: 'Incorrect admin password.' };
+    }
+
+    const adminUser: User = {
+      id: account.id,
+      name: account.name,
+      email: account.email,
+      phone: account.phone || '01711234567',
+      role: account.role === 'super_admin' ? 'admin' : 'sub_admin',
+      adminRole: account.role,
+      permissions: account.permissions,
+      defaultDistrict: 'Dhaka',
+      defaultAddress: 'Gulshan 2, Dhaka, Bangladesh'
+    };
+
+    setCurrentUser(adminUser);
+    showToast(
+      `Welcome, ${adminUser.name} (${account.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'})!`,
+      'success'
+    );
+    return { success: true, message: 'Admin login successful', user: adminUser };
+  };
+
+  // Sub Admin Management by Super Admin
+  const createSubAdmin = (payload: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+    permissions: string[];
+  }) => {
+    const cleanEmail = payload.email.trim().toLowerCase();
+    if (adminAccounts.some((a) => a.email.toLowerCase() === cleanEmail)) {
+      return { success: false, message: 'An administrator with this email address already exists.' };
+    }
+
+    const newSubAdmin: AdminAccount = {
+      id: `admin-sub-${Date.now()}`,
+      name: payload.name.trim(),
+      email: cleanEmail,
+      password: payload.password,
+      role: 'sub_admin',
+      phone: payload.phone?.trim() || '',
+      permissions: payload.permissions.length > 0 ? payload.permissions : ['orders', 'tracking'],
+      createdAt: new Date().toISOString().split('T')[0],
+      isActive: true
+    };
+
+    setAdminAccounts((prev) => [...prev, newSubAdmin]);
+    showToast(`Sub Admin "${newSubAdmin.name}" added successfully!`, 'success');
+    return { success: true, message: 'Sub Admin created successfully.' };
+  };
+
+  const deleteSubAdmin = (id: string) => {
+    const account = adminAccounts.find((a) => a.id === id);
+    if (!account) return { success: false, message: 'Account not found.' };
+    if (account.role === 'super_admin') {
+      showToast('Super Admin account cannot be deleted!', 'error');
+      return { success: false, message: 'Super Admin cannot be deleted.' };
+    }
+
+    setAdminAccounts((prev) => prev.filter((a) => a.id !== id));
+    showToast(`Sub Admin "${account.name}" removed.`, 'info');
+    return { success: true, message: 'Sub Admin deleted.' };
+  };
+
+  const toggleSubAdminStatus = (id: string) => {
+    setAdminAccounts((prev) =>
+      prev.map((a) => {
+        if (a.id === id) {
+          if (a.role === 'super_admin') {
+            showToast('Super Admin status cannot be deactivated.', 'error');
+            return a;
+          }
+          const updated = !a.isActive;
+          showToast(
+            `Admin "${a.name}" is now ${updated ? 'Active' : 'Deactivated'}.`,
+            updated ? 'success' : 'info'
+          );
+          return { ...a, isActive: updated };
+        }
+        return a;
+      })
+    );
   };
 
   return (
@@ -907,7 +1063,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateSettings,
 
         login,
+        loginWithPhone,
+        updateUserProfile,
         logout,
+
+        adminAccounts,
+        createSubAdmin,
+        deleteSubAdmin,
+        toggleSubAdminStatus,
+        adminLogin,
         showToast,
         removeToast
       }}

@@ -121,6 +121,20 @@ export interface Order {
   }[];
 }
 
+export type AdminRole = 'super_admin' | 'sub_admin';
+
+export interface AdminAccount {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: AdminRole;
+  phone?: string;
+  permissions: string[];
+  createdAt: string;
+  isActive: boolean;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -129,7 +143,9 @@ export interface User {
   avatar?: string;
   defaultDistrict?: string;
   defaultAddress?: string;
-  role: 'customer' | 'admin';
+  role: 'customer' | 'admin' | 'sub_admin' | 'super_admin';
+  adminRole?: AdminRole;
+  permissions?: string[];
 }
 
 export interface StoreSettings {

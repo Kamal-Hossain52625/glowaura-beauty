@@ -144,11 +144,6 @@ export const Footer: React.FC = () => {
             </h5>
             <ul className="space-y-2.5 text-zinc-400">
               <li>
-                <button onClick={() => navigateTo('order-tracking')} className="hover:text-white transition-colors cursor-pointer">
-                  Track Your Order
-                </button>
-              </li>
-              <li>
                 <button onClick={() => navigateTo('account')} className="hover:text-white transition-colors cursor-pointer">
                   My Orders & Wishlist
                 </button>
@@ -160,7 +155,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button onClick={() => navigateTo('admin')} className="hover:text-white transition-colors cursor-pointer text-[#E86A92]">
-                  Admin Dashboard
+                  Admin Dashboard (Track & Manage)
                 </button>
               </li>
               <li>
