@@ -89,6 +89,8 @@ interface StoreContextType {
   cartTotal: number;
   selectedDistrict: string;
   setSelectedDistrict: (district: string) => void;
+  deliveryZone: 'inside_dhaka' | 'sub_dhaka' | 'outside_dhaka';
+  setDeliveryZone: (zone: 'inside_dhaka' | 'sub_dhaka' | 'outside_dhaka') => void;
 
   // Wishlist actions
   toggleWishlist: (productId: string) => void;
@@ -110,6 +112,7 @@ interface StoreContextType {
     deliveryNote?: string;
     paymentMethod: 'cod' | 'bkash' | 'nagad' | 'card';
     transactionId?: string;
+    deliveryCharge?: number;
   }) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus, note?: string) => void;
   activeTrackingOrder: Order | null;
@@ -258,6 +261,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('Dhaka');
+  const [deliveryZone, setDeliveryZone] = useState<'inside_dhaka' | 'sub_dhaka' | 'outside_dhaka'>('inside_dhaka');
   const [trackingNumber, setTrackingNumber] = useState<string>('');
 
   // Notifications
@@ -306,7 +310,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [settings, setSettings] = useState<StoreSettings>(() => {
     const saved = localStorage.getItem('glowaura_settings');
-    return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          ...INITIAL_SETTINGS,
+          ...parsed,
+          deliveryInsideDhaka: 70,
+          deliverySubDhaka: 100,
+          deliveryOutsideDhaka: 130
+        };
+      } catch {
+        return INITIAL_SETTINGS;
+      }
+    }
+    return INITIAL_SETTINGS;
   });
 
   const [adminAccounts, setAdminAccounts] = useState<AdminAccount[]>(() => {
@@ -441,19 +459,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     let newPath = '/';
     if (view === 'admin') {
       newPath = '/admin';
-      // Ensure user has admin role when navigating to admin view
-      if (!currentUser || currentUser.role !== 'admin') {
-        const adminUser: User = {
-          id: 'admin-1',
-          name: 'Store Manager (Super Admin)',
-          email: 'admin@glowaurabd.com',
-          phone: '01711234567',
-          defaultDistrict: 'Dhaka',
-          defaultAddress: 'Gulshan 2, Dhaka, Bangladesh',
-          role: 'admin'
-        };
-        setCurrentUser(adminUser);
-      }
     } else if (view === 'account') {
       newPath = '/account';
     } else if (view === 'shop') {
@@ -496,15 +501,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }
 
-  // Bangladesh Delivery Rules: Inside Dhaka 60, Sub-Dhaka 90, Outside Dhaka 120
+  // Bangladesh Delivery Rules: Inside Dhaka 70, Sub-Dhaka 100, Outside Dhaka 130
   const cartDeliveryCharge =
     cartSubtotal >= settings.freeDeliveryThreshold || cart.length === 0
       ? 0
-      : selectedDistrict.toLowerCase() === 'dhaka'
-      ? settings.deliveryInsideDhaka
-      : ['gazipur', 'narayanganj'].includes(selectedDistrict.toLowerCase())
-      ? settings.deliverySubDhaka
-      : settings.deliveryOutsideDhaka;
+      : deliveryZone === 'inside_dhaka'
+      ? (settings.deliveryInsideDhaka || 70)
+      : deliveryZone === 'sub_dhaka'
+      ? (settings.deliverySubDhaka || 100)
+      : (settings.deliveryOutsideDhaka || 130);
 
   const cartTotal = Math.max(0, cartSubtotal - cartDiscount + cartDeliveryCharge);
 
@@ -611,6 +616,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     deliveryNote?: string;
     paymentMethod: 'cod' | 'bkash' | 'nagad' | 'card';
     transactionId?: string;
+    deliveryCharge?: number;
   }): Order => {
     const orderNum = `GLOW-BD-${Math.floor(10000 + Math.random() * 90000)}`;
     const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
@@ -623,6 +629,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       quantity: c.quantity,
       total: (c.product.discountPrice || c.product.regularPrice) * c.quantity
     }));
+
+    const finalDeliveryCharge =
+      payload.deliveryCharge !== undefined ? payload.deliveryCharge : cartDeliveryCharge;
+    const finalTotal = Math.max(0, cartSubtotal - cartDiscount + finalDeliveryCharge);
 
     const newOrder: Order = {
       id: `ord-${Date.now()}`,
@@ -638,8 +648,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       items: orderItems,
       subtotal: cartSubtotal,
       discount: cartDiscount,
-      deliveryCharge: cartDeliveryCharge,
-      total: cartTotal,
+      deliveryCharge: finalDeliveryCharge,
+      total: finalTotal,
       paymentMethod: payload.paymentMethod,
       paymentStatus:
         payload.paymentMethod === 'cod'
@@ -1031,6 +1041,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         cartTotal,
         selectedDistrict,
         setSelectedDistrict,
+        deliveryZone,
+        setDeliveryZone,
 
         toggleWishlist,
         isInWishlist,

@@ -101,7 +101,7 @@ export const AccountPage: React.FC = () => {
       setOtpStep('verify');
       setResendCountdown(30);
       setIsSendingOtp(false);
-      showToast(`📲 SMS Sent to +880 ${cleanedPhone}: Verification OTP is ${code}`, 'success');
+      showToast(`📲 SMS Sent to +88 ${cleanedPhone}: Verification OTP is ${code}`, 'success');
     }, 600);
   };
 
@@ -177,7 +177,7 @@ export const AccountPage: React.FC = () => {
             <p className="text-xs text-zinc-500">
               {otpStep === 'phone'
                 ? 'আপনার ফোন নম্বর দিন। কোনো পাসওয়ার্ড ছাড়াই ওটিপি দিয়ে সরাসরি লগইন করুন।'
-                : `+880 ${authPhone} নম্বরে পাঠানো ৪ ডিজিটের কোডটি লিখুন`}
+                : `+88 ${authPhone} নম্বরে পাঠানো ৪ ডিজিটের কোডটি লিখুন`}
             </p>
           </div>
 

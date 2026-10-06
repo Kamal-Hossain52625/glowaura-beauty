@@ -2352,7 +2352,7 @@ export const AdminDashboard: React.FC = () => {
                   <p className="text-xs text-zinc-500">Configure Bangladesh shipping rates and merchant mobile accounts</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                   <div>
                     <label className="block font-semibold text-zinc-700 mb-1">
                       Inside Dhaka Delivery Fee (৳)
@@ -2362,6 +2362,20 @@ export const AdminDashboard: React.FC = () => {
                       value={settings.deliveryInsideDhaka}
                       onChange={(e) =>
                         updateSettings({ deliveryInsideDhaka: Number(e.target.value) })
+                      }
+                      className="w-full bg-zinc-50 border border-zinc-200 p-2.5 rounded-xl outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-zinc-700 mb-1">
+                      Sub Area Dhaka Delivery Fee (৳)
+                    </label>
+                    <input
+                      type="number"
+                      value={settings.deliverySubDhaka}
+                      onChange={(e) =>
+                        updateSettings({ deliverySubDhaka: Number(e.target.value) })
                       }
                       className="w-full bg-zinc-50 border border-zinc-200 p-2.5 rounded-xl outline-hidden"
                     />

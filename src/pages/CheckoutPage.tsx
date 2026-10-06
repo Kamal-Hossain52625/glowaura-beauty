@@ -26,6 +26,8 @@ export const CheckoutPage: React.FC = () => {
     cartTotal,
     selectedDistrict,
     setSelectedDistrict,
+    deliveryZone,
+    setDeliveryZone,
     placeOrder,
     navigateTo,
     currentUser,
@@ -33,10 +35,12 @@ export const CheckoutPage: React.FC = () => {
     showToast
   } = useStore();
 
-  const [customerName, setCustomerName] = useState(currentUser?.name || '');
-  const [customerPhone, setCustomerPhone] = useState(currentUser?.phone || '');
+  // No default pre-filled data - inputs start clean and empty
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [district, setDistrict] = useState('');
   const [cityArea, setCityArea] = useState('');
-  const [fullAddress, setFullAddress] = useState(currentUser?.defaultAddress || '');
+  const [fullAddress, setFullAddress] = useState('');
   const [deliveryNote, setDeliveryNote] = useState('');
 
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'bkash' | 'nagad' | 'card'>('cod');
@@ -165,8 +169,8 @@ export const CheckoutPage: React.FC = () => {
     setErrorMessage('');
 
     const cleanPhone = customerPhone.replace(/\D/g, '');
-    if (!customerName.trim() || !customerPhone.trim() || !fullAddress.trim() || !cityArea.trim()) {
-      setErrorMessage('অনুগ্রহ করে সব তারকা চিহ্নিত (*) তথ্য পূরণ করুন।');
+    if (!customerName.trim() || !customerPhone.trim() || !district.trim() || !fullAddress.trim() || !cityArea.trim()) {
+      setErrorMessage('অনুগ্রহ করে সব তারকা চিহ্নিত (*) তথ্য (নাম, ফোন, জেলা, থানা/এরিয়া, ঠিকানা) পূরণ করুন।');
       return;
     }
 
@@ -247,7 +251,7 @@ export const CheckoutPage: React.FC = () => {
         customerName: customerName.trim(),
         customerEmail: `${cleanPhone}@customer.glowaurabd.com`,
         customerPhone: customerPhone.trim(),
-        district: selectedDistrict,
+        district: district.trim(),
         cityArea: cityArea.trim(),
         fullAddress: fullAddress.trim(),
         deliveryNote: deliveryNote.trim(),
@@ -299,6 +303,112 @@ export const CheckoutPage: React.FC = () => {
                 1. ডেলিভারি ও যোগাযোগের তথ্য (Phone & Address)
               </h3>
 
+              {/* Delivery Charge 3 Options: Inside Dhaka-70, Sub Area Dhaka-100, Outside Dhaka-130 */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-zinc-800">
+                    ডেলিভারি চার্জ নির্বাচন করুন <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-[11px] text-[#E86A92] font-bold">
+                    {deliveryZone === 'inside_dhaka' && 'ঢাকা সিটি: ৳৭০'}
+                    {deliveryZone === 'sub_dhaka' && 'ঢাকা সাব-এরিয়া: ৳১০০'}
+                    {deliveryZone === 'outside_dhaka' && 'ঢাকার বাইরে: ৳১৩০'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Option 1: Inside Dhaka - 70 */}
+                  <div
+                    onClick={() => {
+                      setDeliveryZone('inside_dhaka');
+                    }}
+                    className={`p-3.5 rounded-2xl border-2 flex flex-col justify-between cursor-pointer transition-all ${
+                      deliveryZone === 'inside_dhaka'
+                        ? 'border-[#E86A92] bg-pink-50/60 shadow-xs ring-1 ring-[#E86A92]/20'
+                        : 'border-zinc-200 bg-zinc-50/50 hover:border-pink-200 hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-zinc-900">Inside Dhaka</span>
+                      <input
+                        type="radio"
+                        name="deliveryZone"
+                        checked={deliveryZone === 'inside_dhaka'}
+                        onChange={() => {
+                          setDeliveryZone('inside_dhaka');
+                        }}
+                        className="text-[#E86A92] focus:ring-[#E86A92]"
+                      />
+                    </div>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">ঢাকার ভিতরে</p>
+                    <div className="mt-2.5 flex items-baseline justify-between pt-2 border-t border-zinc-100">
+                      <span className="text-base font-black text-[#E86A92]">৳70</span>
+                      <span className="text-[10px] text-zinc-400 font-medium">২৪-৪৮ ঘণ্টা</span>
+                    </div>
+                  </div>
+
+                  {/* Option 2: Sub Area Dhaka - 100 */}
+                  <div
+                    onClick={() => {
+                      setDeliveryZone('sub_dhaka');
+                    }}
+                    className={`p-3.5 rounded-2xl border-2 flex flex-col justify-between cursor-pointer transition-all ${
+                      deliveryZone === 'sub_dhaka'
+                        ? 'border-[#E86A92] bg-pink-50/60 shadow-xs ring-1 ring-[#E86A92]/20'
+                        : 'border-zinc-200 bg-zinc-50/50 hover:border-pink-200 hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-zinc-900">Sub Area Dhaka</span>
+                      <input
+                        type="radio"
+                        name="deliveryZone"
+                        checked={deliveryZone === 'sub_dhaka'}
+                        onChange={() => {
+                          setDeliveryZone('sub_dhaka');
+                        }}
+                        className="text-[#E86A92] focus:ring-[#E86A92]"
+                      />
+                    </div>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">সাভার, কেরানীগঞ্জ, গাজীপুর</p>
+                    <div className="mt-2.5 flex items-baseline justify-between pt-2 border-t border-zinc-100">
+                      <span className="text-base font-black text-[#E86A92]">৳100</span>
+                      <span className="text-[10px] text-zinc-400 font-medium">২-৩ দিন</span>
+                    </div>
+                  </div>
+
+                  {/* Option 3: Outside Dhaka - 130 */}
+                  <div
+                    onClick={() => {
+                      setDeliveryZone('outside_dhaka');
+                    }}
+                    className={`p-3.5 rounded-2xl border-2 flex flex-col justify-between cursor-pointer transition-all ${
+                      deliveryZone === 'outside_dhaka'
+                        ? 'border-[#E86A92] bg-pink-50/60 shadow-xs ring-1 ring-[#E86A92]/20'
+                        : 'border-zinc-200 bg-zinc-50/50 hover:border-pink-200 hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-zinc-900">Outside Dhaka</span>
+                      <input
+                        type="radio"
+                        name="deliveryZone"
+                        checked={deliveryZone === 'outside_dhaka'}
+                        onChange={() => {
+                          setDeliveryZone('outside_dhaka');
+                        }}
+                        className="text-[#E86A92] focus:ring-[#E86A92]"
+                      />
+                    </div>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">ঢাকার বাইরে সারাদেশে</p>
+                    <div className="mt-2.5 flex items-baseline justify-between pt-2 border-t border-zinc-100">
+                      <span className="text-base font-black text-[#E86A92]">৳130</span>
+                      <span className="text-[10px] text-zinc-400 font-medium">৩-৫ দিন</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-zinc-700 mb-1">
@@ -307,7 +417,7 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Maria Afrin"
+                    placeholder="আপনার পুরো নাম লিখুন (e.g. Sabrina Akter)"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
@@ -325,7 +435,7 @@ export const CheckoutPage: React.FC = () => {
                     <input
                       type="tel"
                       required
-                      placeholder="017XXXXXXXX"
+                      placeholder="01XXXXXXXXX"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
                       className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-r-xl outline-hidden focus:border-[#E86A92] focus:bg-white font-mono"
@@ -339,17 +449,32 @@ export const CheckoutPage: React.FC = () => {
                   <label className="block text-xs font-semibold text-zinc-700 mb-1">
                     ডেলিভারি জেলা <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    value={selectedDistrict}
-                    onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white cursor-pointer"
-                  >
+                  <input
+                    type="text"
+                    required
+                    list="bd-all-districts"
+                    placeholder="আপনার জেলার নাম লিখুন (যেমন: ঢাকা, চট্টগ্রাম, বগুড়া ইত্যাদি)"
+                    value={district}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setDistrict(val);
+                      setSelectedDistrict(val);
+                      const lower = val.trim().toLowerCase();
+                      if (lower === 'dhaka' || lower === 'ঢাকা') {
+                        setDeliveryZone('inside_dhaka');
+                      } else if (
+                        ['gazipur', 'narayanganj', 'গাজীপুর', 'নারায়ণগঞ্জ', 'সাভার', 'savar', 'কেরানীগঞ্জ', 'keraniganj'].includes(lower)
+                      ) {
+                        setDeliveryZone('sub_dhaka');
+                      }
+                    }}
+                    className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                  />
+                  <datalist id="bd-all-districts">
                     {BANGLADESH_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>
-                        {d} {d === 'Dhaka' ? '(Inside Dhaka - ৳60)' : '(Outside Dhaka - ৳120)'}
-                      </option>
+                      <option key={d} value={d} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div>
@@ -359,7 +484,7 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Dhanmondi, Uttara, বা কোতোয়ালী"
+                    placeholder="e.g. ধানমন্ডি, মিরপুর, উত্তরা, বা কোতোয়ালী"
                     value={cityArea}
                     onChange={(e) => setCityArea(e.target.value)}
                     className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
@@ -374,7 +499,7 @@ export const CheckoutPage: React.FC = () => {
                 <textarea
                   rows={2}
                   required
-                  placeholder="e.g. House 42, Road 27, Block A, Dhanmondi"
+                  placeholder="বাসা নম্বর, রোড নম্বর, এলাকা ইত্যাদি বিস্তারিত লিখুন"
                   value={fullAddress}
                   onChange={(e) => setFullAddress(e.target.value)}
                   className="w-full bg-zinc-50 border border-zinc-200 text-xs p-3 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
@@ -573,7 +698,13 @@ export const CheckoutPage: React.FC = () => {
 
                 <div className="flex justify-between">
                   <span>
-                    Delivery Fee ({selectedDistrict === 'Dhaka' ? 'Inside Dhaka' : 'Outside Dhaka'})
+                    Delivery Fee (
+                    {deliveryZone === 'inside_dhaka'
+                      ? 'Inside Dhaka - ৳70'
+                      : deliveryZone === 'sub_dhaka'
+                      ? 'Sub Area Dhaka - ৳100'
+                      : 'Outside Dhaka - ৳130'}
+                    )
                   </span>
                   <span className="font-semibold text-zinc-900">
                     {cartDeliveryCharge === 0 ? 'FREE' : `৳${cartDeliveryCharge}`}

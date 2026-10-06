@@ -5,9 +5,9 @@ export const INITIAL_SETTINGS: StoreSettings = {
   hotline: "+880 1711-234567",
   supportEmail: "support@glowaurabd.com",
   announcement: "✨ Free Express Delivery across Bangladesh on orders over ৳2,500 | 100% Authentic Korean & Global Brands",
-  deliveryInsideDhaka: 60,
-  deliveryOutsideDhaka: 120,
-  deliverySubDhaka: 90,
+  deliveryInsideDhaka: 70,
+  deliveryOutsideDhaka: 130,
+  deliverySubDhaka: 100,
   freeDeliveryThreshold: 2500,
   bkashMerchantNumber: "01711234567 (Merchant)",
   nagadMerchantNumber: "01811234567 (Merchant)",
@@ -1435,9 +1435,14 @@ export const INITIAL_REVIEWS: Review[] = [
 ];
 
 export const BANGLADESH_DISTRICTS = [
-  "Dhaka", "Chattogram", "Sylhet", "Rajshahi", "Khulna", "Barishal", "Rangpur", "Mymensingh",
-  "Gazipur", "Narayanganj", "Cumilla", "Bogura", "Cox's Bazar", "Jessore", "Feni", "Brahmanbaria",
-  "Tangail", "Faridpur", "Jamalpur", "Pabna", "Sirajganj", "Dinajpur", "Kushtia", "Narsingdi"
+  "Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur",
+  "Chapainawabganj", "Chattogram", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka", "Dinajpur", "Faridpur",
+  "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokathi",
+  "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur",
+  "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh",
+  "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali",
+  "Pabna", "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur",
+  "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"
 ];
 
 export const INITIAL_ADMIN_ACCOUNTS: AdminAccount[] = [
