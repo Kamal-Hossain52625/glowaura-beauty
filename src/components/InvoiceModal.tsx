@@ -48,16 +48,16 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
           <div className="flex justify-between items-start border-b border-zinc-200 pb-6">
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-[#E86A92] flex items-center justify-center text-white">
-                  <Sparkles className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-full bg-[#E86A92] flex items-center justify-center text-white font-bold text-xs">
+                  A&A
                 </div>
                 <span className="font-display text-xl font-bold tracking-tight text-zinc-900">
-                  GlowAura<span className="text-[#E86A92]">.</span>
+                  Ayat & Amat<span className="text-[#E86A92]">.</span>
                 </span>
               </div>
-              <p className="text-[11px] text-zinc-500 mt-1">GlowAura Beauty Bangladesh Ltd.</p>
+              <p className="text-[11px] text-zinc-500 mt-1">Ayat & Amat Fashion & Lifestyle BD</p>
               <p className="text-[11px] text-zinc-500">Road 11, Banani, Dhaka-1213, Bangladesh</p>
-              <p className="text-[11px] text-zinc-500">Hotline: +880 1711-234567 | support@glowaurabd.com</p>
+              <p className="text-[11px] text-zinc-500">Hotline: +880 1711-234567 | support@ayatamat.com</p>
               <p className="text-[11px] text-zinc-500">BIN / Trade License: 002918274-0102</p>
             </div>
 

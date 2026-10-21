@@ -20,6 +20,8 @@ export const ShopPage: React.FC = () => {
     brands,
     selectedCategory,
     setSelectedCategory,
+    selectedSubcategory,
+    setSelectedSubcategory,
     selectedBrand,
     setSelectedBrand,
     searchQuery,
@@ -47,6 +49,7 @@ export const ShopPage: React.FC = () => {
           !p.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !p.brand.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !p.category.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !p.subcategory.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !p.sku.toLowerCase().includes(searchQuery.toLowerCase())
         ) {
           return false;
@@ -54,6 +57,11 @@ export const ShopPage: React.FC = () => {
 
         // Category
         if (selectedCategory && p.category !== selectedCategory) {
+          return false;
+        }
+
+        // Subcategory (Item e.g. Shirt, T-Shirt, Pant, Clock)
+        if (selectedSubcategory && p.subcategory !== selectedSubcategory) {
           return false;
         }
 
@@ -105,6 +113,7 @@ export const ShopPage: React.FC = () => {
     products,
     searchQuery,
     selectedCategory,
+    selectedSubcategory,
     selectedBrand,
     inStockOnly,
     onSaleOnly,
@@ -116,6 +125,7 @@ export const ShopPage: React.FC = () => {
 
   const clearAllFilters = () => {
     setSelectedCategory(null);
+    setSelectedSubcategory(null);
     setSelectedBrand(null);
     setSearchQuery('');
     setInStockOnly(false);
@@ -127,6 +137,7 @@ export const ShopPage: React.FC = () => {
 
   const hasActiveFilters =
     selectedCategory !== null ||
+    selectedSubcategory !== null ||
     selectedBrand !== null ||
     searchQuery !== '' ||
     inStockOnly ||
@@ -140,11 +151,43 @@ export const ShopPage: React.FC = () => {
       {/* Page Title & Breadcrumb */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+          <div className="flex items-center gap-2 text-xs text-zinc-500 mb-1.5">
+            <span
+              onClick={() => {
+                setSelectedCategory(null);
+                setSelectedSubcategory(null);
+              }}
+              className="hover:text-[#E86A92] cursor-pointer"
+            >
+              All Products
+            </span>
+            {selectedCategory && (
+              <>
+                <span>/</span>
+                <span
+                  onClick={() => setSelectedSubcategory(null)}
+                  className={`cursor-pointer ${!selectedSubcategory ? 'font-bold text-[#E86A92]' : 'hover:text-[#E86A92]'}`}
+                >
+                  {selectedCategory}
+                </span>
+              </>
+            )}
+            {selectedSubcategory && (
+              <>
+                <span>/</span>
+                <span className="font-bold text-[#E86A92]">{selectedSubcategory}</span>
+              </>
+            )}
+          </div>
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-zinc-900">
-            {selectedCategory ? `${selectedCategory} Collection` : 'All Beauty & Cosmetics'}
+            {selectedCategory
+              ? selectedSubcategory
+                ? `${selectedCategory} › ${selectedSubcategory}`
+                : selectedCategory
+              : 'All Products & Collections'}
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Showing {filteredProducts.length} of {products.length} verified products
+            Showing {filteredProducts.length} of {products.length} verified products in Ayat & Amat
           </p>
         </div>
 
@@ -178,40 +221,86 @@ export const ShopPage: React.FC = () => {
               )}
             </div>
 
-            {/* Categories */}
+            {/* Categories & Subcategories Tree */}
             <div>
               <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-2.5">
-                Category
+                Collections & Items
               </h4>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              <div className="space-y-2">
                 <button
-                  onClick={() => setSelectedCategory(null)}
-                  className={`w-full text-left text-xs py-1 px-2 rounded-lg transition-colors flex justify-between items-center cursor-pointer ${
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setSelectedSubcategory(null);
+                  }}
+                  className={`w-full text-left text-xs py-1.5 px-2.5 rounded-xl transition-all flex justify-between items-center cursor-pointer ${
                     selectedCategory === null
-                      ? 'bg-pink-50 text-[#E86A92] font-bold'
-                      : 'text-zinc-600 hover:bg-zinc-50'
+                      ? 'bg-[#E86A92] text-white font-bold shadow-xs'
+                      : 'text-zinc-700 hover:bg-zinc-50'
                   }`}
                 >
-                  <span>All Categories</span>
-                  <span>{products.length}</span>
+                  <span>All Collections</span>
+                  <span className={`text-[10px] ${selectedCategory === null ? 'text-white' : 'text-zinc-400'}`}>
+                    ({products.length})
+                  </span>
                 </button>
+
                 {categories.map((cat) => {
-                  const count = products.filter((p) => p.category === cat.name).length;
+                  const catCount = products.filter((p) => p.category === cat.name).length;
+                  const isCurrentCat = selectedCategory === cat.name;
+
                   return (
-                    <button
-                      key={cat.id}
-                      onClick={() =>
-                        setSelectedCategory(selectedCategory === cat.name ? null : cat.name)
-                      }
-                      className={`w-full text-left text-xs py-1 px-2 rounded-lg transition-colors flex justify-between items-center cursor-pointer ${
-                        selectedCategory === cat.name
-                          ? 'bg-pink-50 text-[#E86A92] font-bold'
-                          : 'text-zinc-600 hover:bg-zinc-50'
-                      }`}
-                    >
-                      <span className="truncate">{cat.name}</span>
-                      <span className="text-[11px] text-zinc-400">({count})</span>
-                    </button>
+                    <div key={cat.id} className="border border-zinc-100 rounded-xl overflow-hidden bg-zinc-50/50">
+                      {/* Category Header */}
+                      <div
+                        onClick={() => {
+                          if (isCurrentCat && selectedSubcategory === null) {
+                            setSelectedCategory(null);
+                          } else {
+                            setSelectedCategory(cat.name);
+                            setSelectedSubcategory(null);
+                          }
+                        }}
+                        className={`w-full text-left text-xs p-2.5 transition-colors flex justify-between items-center cursor-pointer ${
+                          isCurrentCat && !selectedSubcategory
+                            ? 'bg-pink-100/70 text-[#E86A92] font-bold'
+                            : 'text-zinc-800 hover:bg-pink-50 font-semibold'
+                        }`}
+                      >
+                        <span className="truncate">
+                          {cat.name === "Men's Collection" ? '👔 ' : cat.name === "Women's Collection" ? '👗 ' : '🍼 '}
+                          {cat.name}
+                        </span>
+                        <span className="text-[11px] text-zinc-400">({catCount})</span>
+                      </div>
+
+                      {/* Subcategories list */}
+                      <div className="px-2 py-1.5 bg-white space-y-1 border-t border-zinc-100/70">
+                        {cat.subcategories.map((sub) => {
+                          const subCount = products.filter(
+                            (p) => p.category === cat.name && p.subcategory === sub
+                          ).length;
+                          const isSubSelected = isCurrentCat && selectedSubcategory === sub;
+
+                          return (
+                            <button
+                              key={sub}
+                              onClick={() => {
+                                setSelectedCategory(cat.name);
+                                setSelectedSubcategory(isSubSelected ? null : sub);
+                              }}
+                              className={`w-full text-left text-[11px] py-1 px-2 rounded-lg transition-colors flex justify-between items-center cursor-pointer ${
+                                isSubSelected
+                                  ? 'bg-pink-50 text-[#E86A92] font-bold'
+                                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+                              }`}
+                            >
+                              <span className="truncate">• {sub}</span>
+                              <span className="text-[10px] text-zinc-400">({subCount})</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -354,7 +443,79 @@ export const ShopPage: React.FC = () => {
         </div>
 
         {/* Product Catalog Content */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 space-y-5">
+          {/* Quick Subcategory / Collection Pills Bar */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {selectedCategory ? (
+              <>
+                <button
+                  onClick={() => setSelectedSubcategory(null)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                    selectedSubcategory === null
+                      ? 'bg-[#E86A92] text-white shadow-xs'
+                      : 'bg-white border border-zinc-200 text-zinc-700 hover:border-[#E86A92]'
+                  }`}
+                >
+                  All {selectedCategory} ({products.filter((p) => p.category === selectedCategory).length})
+                </button>
+                {categories
+                  .find((c) => c.name === selectedCategory)
+                  ?.subcategories.map((sub) => {
+                    const count = products.filter(
+                      (p) => p.category === selectedCategory && p.subcategory === sub
+                    ).length;
+                    const isSelected = selectedSubcategory === sub;
+                    return (
+                      <button
+                        key={sub}
+                        onClick={() => setSelectedSubcategory(isSelected ? null : sub)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-[#E86A92] text-white shadow-xs'
+                            : 'bg-white border border-zinc-200 text-zinc-700 hover:border-[#E86A92]'
+                        }`}
+                      >
+                        <span>{sub}</span>
+                        <span className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-zinc-400'}`}>
+                          ({count})
+                        </span>
+                      </button>
+                    );
+                  })}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setSelectedSubcategory(null);
+                  }}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-[#E86A92] text-white shadow-xs cursor-pointer"
+                >
+                  All Collections ({products.length})
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => {
+                      setSelectedCategory(c.name);
+                      setSelectedSubcategory(null);
+                    }}
+                    className="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-white border border-zinc-200 text-zinc-700 hover:border-[#E86A92] transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>
+                      {c.name === "Men's Collection" ? '👔 ' : c.name === "Women's Collection" ? '👗 ' : '🍼 '}
+                      {c.name}
+                    </span>
+                    <span className="text-[10px] text-zinc-400">
+                      ({products.filter((p) => p.category === c.name).length})
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+
           {/* Top Sort & View Bar */}
           <div className="bg-white border border-[#F8E8EE] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2">
@@ -377,11 +538,23 @@ export const ShopPage: React.FC = () => {
               {hasActiveFilters && (
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {selectedCategory && (
-                    <span className="bg-pink-100 text-[#E86A92] text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span className="bg-pink-100 text-[#E86A92] text-xs px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
                       {selectedCategory}
                       <X
                         className="w-3 h-3 cursor-pointer"
-                        onClick={() => setSelectedCategory(null)}
+                        onClick={() => {
+                          setSelectedCategory(null);
+                          setSelectedSubcategory(null);
+                        }}
+                      />
+                    </span>
+                  )}
+                  {selectedSubcategory && (
+                    <span className="bg-[#E86A92] text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
+                      Item: {selectedSubcategory}
+                      <X
+                        className="w-3 h-3 cursor-pointer text-white"
+                        onClick={() => setSelectedSubcategory(null)}
                       />
                     </span>
                   )}
@@ -472,21 +645,55 @@ export const ShopPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Category */}
+            {/* Collections & Items */}
             <div>
-              <h4 className="text-xs font-bold uppercase mb-2">Category</h4>
-              <div className="space-y-1">
+              <h4 className="text-xs font-bold uppercase mb-2">Collections & Items</h4>
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setSelectedSubcategory(null);
+                    setIsMobileFiltersOpen(false);
+                  }}
+                  className={`w-full text-left text-xs py-1.5 px-2 rounded-lg font-bold ${
+                    selectedCategory === null ? 'bg-[#E86A92] text-white' : 'text-zinc-700 bg-zinc-100'
+                  }`}
+                >
+                  All Collections ({products.length})
+                </button>
                 {categories.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => {
-                      setSelectedCategory(c.name);
-                      setIsMobileFiltersOpen(false);
-                    }}
-                    className="w-full text-left text-xs py-1.5 text-zinc-700"
-                  >
-                    {c.name}
-                  </button>
+                  <div key={c.id} className="border border-zinc-100 rounded-xl p-2.5 bg-zinc-50/60 space-y-1.5">
+                    <button
+                      onClick={() => {
+                        setSelectedCategory(c.name);
+                        setSelectedSubcategory(null);
+                        setIsMobileFiltersOpen(false);
+                      }}
+                      className="w-full text-left text-xs font-bold text-zinc-900 flex justify-between"
+                    >
+                      <span>{c.name}</span>
+                      <span className="text-[10px] text-[#E86A92]">View All</span>
+                    </button>
+                    <div className="grid grid-cols-2 gap-1 pt-1">
+                      {c.subcategories.map((sub) => (
+                        <button
+                          key={sub}
+                          onClick={() => {
+                            setSelectedCategory(c.name);
+                            setSelectedSubcategory(sub);
+                            setIsMobileFiltersOpen(false);
+                          }}
+                          className={`text-left text-[11px] p-1 rounded-md transition-colors ${
+                            selectedCategory === c.name && selectedSubcategory === sub
+                              ? 'bg-pink-100 text-[#E86A92] font-bold'
+                              : 'text-zinc-600 hover:text-zinc-900'
+                          }`}
+                        >
+                          • {sub}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -496,7 +703,7 @@ export const ShopPage: React.FC = () => {
                 clearAllFilters();
                 setIsMobileFiltersOpen(false);
               }}
-              className="w-full bg-zinc-100 text-zinc-800 text-xs font-semibold py-2.5 rounded-xl"
+              className="w-full bg-zinc-100 text-zinc-800 text-xs font-semibold py-2.5 rounded-xl cursor-pointer"
             >
               Reset Filters
             </button>

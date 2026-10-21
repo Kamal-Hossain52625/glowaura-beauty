@@ -30,12 +30,12 @@ export const HomePage: React.FC = () => {
 
   const heroSlides = [
     {
-      subtitle: "AUTHENTIC K-BEAUTY IN BANGLADESH",
-      title: "Unlock Glass Skin with Korean Essentials",
-      description: "Discover genuine COSRX Snail Mucin, Beauty of Joseon Sun Relief, and Anua Heartleaf at transparent Dhaka prices.",
-      buttonText: "Shop Skincare Now",
-      categoryTarget: "Skincare",
-      image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1400&q=80"
+      subtitle: "AYAT & AMAT LIFESTYLE & APPAREL 2026",
+      title: "Timeless Style, Authentic Heritage",
+      description: "Discover curated Men's Collection (Shirt, T-Shirt, Pant, Clock), luxury Women's Three-Piece & Sarees, and gentle organic Baby essentials.",
+      buttonText: "Shop Collections",
+      categoryTarget: "Men's Collection",
+      image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1400&q=80"
     }
   ];
 
@@ -49,44 +49,58 @@ export const HomePage: React.FC = () => {
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-pink-200 text-xs font-bold text-[#E86A92] shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>SPRING GLOW EDIT 2026</span>
+                <span>NEW SEASON COLLECTION 2026</span>
               </div>
 
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-zinc-900 leading-[1.1] tracking-tight">
-                Pure Radiance, <br />
-                <span className="text-[#E86A92] italic font-serif">Authentic</span> Beauty.
+                Timeless Elegance, <br />
+                <span className="text-[#E86A92] italic font-serif">Ayat & Amat</span> Quality.
               </h1>
 
               <p className="text-zinc-600 text-sm sm:text-base max-w-xl leading-relaxed">
-                Bangladesh’s premier curated boutique for authentic Korean and international skincare, lightweight tropical sunscreens, and dermatological essentials.
+                Bangladesh’s premier destination for fine tailored Men's shirts, pants & watches, handcrafted Women's fashion, and organic baby wear.
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   onClick={() => navigateTo('shop')}
-                  className="bg-[#E86A92] hover:bg-[#d6577e] text-white px-7 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                  className="bg-[#E86A92] hover:bg-[#d6577e] text-white px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
                 >
-                  <span>Explore Catalog</span>
+                  <span>All Products Catalog</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
                 <button
-                  onClick={() => navigateTo('shop', 'Sun Care')}
-                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                  onClick={() => navigateTo('shop', "Men's Collection")}
+                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
                 >
-                  Sun Protection
+                  👔 Men's Collection
+                </button>
+
+                <button
+                  onClick={() => navigateTo('shop', "Women's Collection")}
+                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  👗 Women's
+                </button>
+
+                <button
+                  onClick={() => navigateTo('shop', "Baby Collection")}
+                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  🍼 Baby
                 </button>
               </div>
 
               {/* Trust Badges */}
-              <div className="pt-6 border-t border-pink-200/60 flex items-center gap-6 text-xs text-zinc-600">
+              <div className="pt-6 border-t border-pink-200/60 flex flex-wrap items-center gap-6 text-xs text-zinc-600">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#E86A92]" />
-                  <span>100% Genuine Barcoded</span>
+                  <span>100% Genuine Quality Fabrics & Movements</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Truck className="w-4 h-4 text-[#E86A92]" />
-                  <span>Dhaka 24h & Nationwide Delivery</span>
+                  <span>Inside Dhaka ৳70 | Sub ৳100 | Outside ৳130</span>
                 </div>
               </div>
             </div>
@@ -96,8 +110,8 @@ export const HomePage: React.FC = () => {
               <div className="relative mx-auto max-w-md lg:max-w-none">
                 <div className="aspect-4/3 sm:aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                   <img
-                    src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1000&q=80"
-                    alt="Luxury Beauty Cosmetics"
+                    src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1000&q=80"
+                    alt="Ayat & Amat Premium Collection"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -108,8 +122,8 @@ export const HomePage: React.FC = () => {
                     ৳
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-zinc-400">First Order Code</p>
-                    <p className="text-sm font-bold text-zinc-900">Use Code: GLOW10</p>
+                    <p className="text-[10px] uppercase font-bold text-zinc-400">Welcome Discount</p>
+                    <p className="text-sm font-bold text-zinc-900">Code: AYAT10 (10% OFF)</p>
                   </div>
                 </div>
               </div>
@@ -122,106 +136,130 @@ export const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div
-            onClick={() => navigateTo('shop', 'Skincare')}
-            className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-pink-50 to-[#F8E8EE] p-6 border border-pink-100 cursor-pointer hover:shadow-md transition-all"
+            onClick={() => navigateTo('shop', "Men's Collection")}
+            className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50/50 p-6 border border-blue-100 cursor-pointer hover:shadow-md transition-all"
+          >
+            <div className="relative z-10 space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                👔 Men's Collection
+              </span>
+              <h3 className="font-display text-xl font-bold text-zinc-900 group-hover:text-blue-700 transition-colors">
+                Shirt, T-Shirt, Pant & Clock
+              </h3>
+              <p className="text-xs text-zinc-600 line-clamp-2">
+                Tailored 100% cotton Oxford shirts, stretch chinos, selvedge denim & chronograph timepieces.
+              </p>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 pt-2">
+                Discover Men's Items →
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => navigateTo('shop', "Women's Collection")}
+            className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-pink-50 to-rose-50/60 p-6 border border-pink-100 cursor-pointer hover:shadow-md transition-all"
           >
             <div className="relative z-10 space-y-2">
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#E86A92]">
-                Dermatologist Recommended
+                👗 Women's Collection
               </span>
               <h3 className="font-display text-xl font-bold text-zinc-900 group-hover:text-[#E86A92] transition-colors">
-                Korean Snail & Barrier Care
+                Three Piece, Saree & Jewelry
               </h3>
               <p className="text-xs text-zinc-600 line-clamp-2">
-                Replenish moisture and repair post-acne scarring with authentic essence formulas.
+                Authentic Dhakai Jamdani sarees, organza unstitched 3-pieces, kurtis, and crystal watches.
               </p>
               <span className="inline-flex items-center gap-1 text-xs font-bold text-[#E86A92] pt-2">
-                Discover Serums →
+                Explore Women's Items →
               </span>
             </div>
           </div>
 
           <div
-            onClick={() => navigateTo('shop', 'Sun Care')}
-            className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 p-6 border border-amber-100 cursor-pointer hover:shadow-md transition-all"
+            onClick={() => navigateTo('shop', "Baby Collection")}
+            className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50/50 p-6 border border-amber-100 cursor-pointer hover:shadow-md transition-all"
           >
             <div className="relative z-10 space-y-2">
               <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                BD Climate Tested
+                🍼 Baby Collection
               </span>
               <h3 className="font-display text-xl font-bold text-zinc-900 group-hover:text-amber-700 transition-colors">
-                Zero White-Cast Sunscreens
+                Rompers, Clothing & Kids Clocks
               </h3>
               <p className="text-xs text-zinc-600 line-clamp-2">
-                Lightweight chemical & mineral SPF50+ formulas that withstand humid weather.
+                GOTS organic newborn onesies, suspender sets, princess frocks, and silent nursery wall clocks.
               </p>
               <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 pt-2">
-                Explore Sun Sticks & Creams →
-              </span>
-            </div>
-          </div>
-
-          <div
-            onClick={() => navigateTo('shop', 'Lip Care')}
-            className="group relative rounded-3xl overflow-hidden bg-gradient-to-br from-rose-50 to-pink-100/50 p-6 border border-rose-100 cursor-pointer hover:shadow-md transition-all"
-          >
-            <div className="relative z-10 space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600">
-                Nightly Recovery
-              </span>
-              <h3 className="font-display text-xl font-bold text-zinc-900 group-hover:text-rose-600 transition-colors">
-                Overnight Lip Sleeping Masks
-              </h3>
-              <p className="text-xs text-zinc-600 line-clamp-2">
-                Melt away dead skin cells and wake up to baby-soft, deeply nourished lips.
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 pt-2">
-                Shop Lip Balms →
+                Browse Baby Essentials →
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Categories Grid */}
+      {/* Featured Collections Grid */}
       <section className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-[#E86A92]">
-              CURATED SELECTIONS
+              AYAT & AMAT COLLECTIONS
             </span>
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-zinc-900 mt-1">
-              Explore by Category
+              Explore Our Collections & Items
             </h2>
           </div>
           <button
             onClick={() => navigateTo('shop')}
             className="text-xs font-bold text-[#E86A92] hover:text-[#d6577e] flex items-center gap-1 cursor-pointer"
           >
-            View All Categories ({categories.length}) →
+            View All Products ({products.length}) →
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {categories.map((cat) => (
             <div
               key={cat.id}
-              onClick={() => navigateTo('shop', cat.name)}
-              className="group cursor-pointer bg-white border border-[#F8E8EE] rounded-2xl p-4 text-center hover:border-[#E86A92] hover:shadow-md transition-all flex flex-col items-center"
+              className="group bg-white border border-[#F8E8EE] rounded-3xl p-5 hover:border-[#E86A92] hover:shadow-lg transition-all flex flex-col justify-between"
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-3 border-2 border-pink-100 group-hover:scale-105 transition-transform">
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-full h-full object-cover"
-                />
+              <div
+                onClick={() => navigateTo('shop', cat.name)}
+                className="cursor-pointer"
+              >
+                <div className="aspect-16/10 rounded-2xl overflow-hidden mb-4 border border-pink-100 group-hover:scale-[1.02] transition-transform">
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <h4 className="font-display font-bold text-base sm:text-lg text-zinc-900 group-hover:text-[#E86A92] transition-colors">
+                    {cat.name}
+                  </h4>
+                  <span className="text-xs font-bold text-[#E86A92] bg-pink-50 px-2.5 py-0.5 rounded-full">
+                    {products.filter((p) => p.category === cat.name).length} Items
+                  </span>
+                </div>
               </div>
-              <h4 className="font-semibold text-xs sm:text-sm text-zinc-800 group-hover:text-[#E86A92] transition-colors">
-                {cat.name}
-              </h4>
-              <span className="text-[11px] text-zinc-400 mt-0.5">
-                {cat.itemCount || 8}+ items
-              </span>
+
+              {/* Subcategories pill links */}
+              <div className="mt-4 pt-3 border-t border-zinc-100">
+                <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+                  Items in this collection:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {cat.subcategories.map((sub) => (
+                    <button
+                      key={sub}
+                      onClick={() => navigateTo('shop', cat.name, sub)}
+                      className="text-[11px] bg-zinc-50 hover:bg-[#E86A92] hover:text-white text-zinc-700 px-2.5 py-1 rounded-lg border border-zinc-200 transition-colors cursor-pointer font-medium"
+                    >
+                      {sub}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -232,10 +270,10 @@ export const HomePage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 border-b border-zinc-100 pb-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-[#E86A92]">
-              TRENDING IN DHAKA
+              TRENDING IN BANGLADESH
             </span>
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-zinc-900 mt-1">
-              Curated Beauty Picks
+              Curated Fashion & Lifestyle Picks
             </h2>
           </div>
 
@@ -308,22 +346,22 @@ export const HomePage: React.FC = () => {
           <div className="max-w-xl space-y-4 relative z-10">
             <span className="text-xs font-bold uppercase tracking-widest text-[#E86A92] flex items-center gap-1.5">
               <Flame className="w-4 h-4" />
-              SPECIAL DEAL OF THE WEEK
+              SPECIAL TIMEPIECE HIGHLIGHT
             </span>
             <h2 className="font-display text-3xl sm:text-4xl font-bold leading-tight">
-              Get Up to 30% Off on Beauty of Joseon
+              Men's Heritage Steel & Skeleton Clocks / Watches
             </h2>
             <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed">
-              Experience ancient Korean royal court Hanbang medicine infused with modern skin science: Rice Bran, Propolis, Ginseng & Mugwort.
+              Crafted with surgical-grade 316L stainless steel, scratch-resistant sapphire crystal glass, and precision Japanese quartz movements. Complete with 1 year warranty.
             </p>
-            <div className="pt-2 flex items-center gap-3">
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
-                onClick={() => navigateTo('shop', 'Beauty of Joseon')}
+                onClick={() => navigateTo('shop', "Men's Collection", 'Clock')}
                 className="bg-[#E86A92] hover:bg-[#d6577e] text-white text-xs font-bold px-6 py-3 rounded-xl transition-colors cursor-pointer shadow-md"
               >
-                Shop Beauty of Joseon
+                Explore Men's Clocks & Watches
               </button>
-              <span className="text-xs text-zinc-400">Coupon code automatically applied</span>
+              <span className="text-xs text-zinc-400">Cash on Delivery across Bangladesh</span>
             </div>
           </div>
         </div>
@@ -333,13 +371,13 @@ export const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4">
         <div className="text-center max-w-xl mx-auto mb-8">
           <span className="text-xs font-bold uppercase tracking-widest text-[#E86A92]">
-            DIRECT SOURCING
+            AUTHENTIC LABELS
           </span>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-zinc-900 mt-1">
-            Top International Beauty Brands
+            Featured Brands & Makers
           </h2>
           <p className="text-xs text-zinc-500 mt-1">
-            Guaranteed 100% genuine with certified batch verification.
+            Ayat & Amat Signature, Zara & Urban, Casio & Curren Timepieces, and Apex Heritage.
           </p>
         </div>
 
@@ -376,10 +414,10 @@ export const HomePage: React.FC = () => {
               COMMUNITY LOVE
             </span>
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-zinc-900 mt-1">
-              What Bangladeshi Beauties Say
+              What Ayat & Amat Customers Say
             </h2>
             <p className="text-xs text-zinc-500 mt-1">
-              Real reviews from verified buyers across Dhaka, Chittagong, Sylhet, and beyond.
+              Real reviews from verified buyers across Dhaka, Chittagong, Sylhet, and nationwide.
             </p>
           </div>
 
@@ -430,10 +468,10 @@ export const HomePage: React.FC = () => {
       {/* Social / Instagram Grid Section */}
       <section className="max-w-7xl mx-auto px-4 text-center">
         <span className="text-xs font-bold uppercase tracking-widest text-[#E86A92]">
-          FOLLOW OUR GLOW
+          FOLLOW OUR JOURNEY
         </span>
         <h2 className="font-display text-2xl font-bold text-zinc-900 mt-1 mb-6">
-          @GlowAura.BD on Instagram
+          @AyatAmat.BD on Instagram
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">

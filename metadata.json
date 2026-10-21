@@ -1,6 +1,6 @@
 {
-  "name": "GlowAura Beauty - Cosmetics & Skincare BD",
-  "description": "Premium authentic beauty and cosmetics e-commerce platform inspired by modern Bangladeshi online stores, featuring fast delivery, bKash/Nagad checkout, complete product catalog, and comprehensive Laravel 12 + Vue 3 architecture.",
+  "name": "Ayat & Amat - Fashion & Lifestyle BD",
+  "description": "Ayat & Amat - Premium Men's Collection (Shirt, T-Shirt, Pant, Clock), Women's Collection (Three Piece, Kurti, Saree, Jewelry), and Baby Collection e-commerce store with express Bangladesh delivery and bKash/Nagad checkout.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

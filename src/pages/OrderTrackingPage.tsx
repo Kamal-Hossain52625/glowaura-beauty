@@ -66,7 +66,7 @@ export const OrderTrackingPage: React.FC = () => {
           <span>REAL-TIME BANGLADESH COURIER TRACKING</span>
         </div>
         <h1 className="font-display text-3xl font-bold text-zinc-900">
-          Track Your Beauty Order
+          Track Your Ayat & Amat Order
         </h1>
         <p className="text-xs text-zinc-500 max-w-md mx-auto">
           Enter your Order Number (e.g. GLOW-BD-91823) or Mobile Phone Number to check current shipment status.

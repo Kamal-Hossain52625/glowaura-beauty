@@ -65,7 +65,7 @@ export const ProductDetailPage: React.FC = () => {
       productId: product.id,
       productName: product.name,
       customerName: reviewName.trim() || 'Verified Customer',
-      customerEmail: currentUser?.email || 'customer@glowaurabd.com',
+      customerEmail: currentUser?.email || 'customer@ayatamat.com',
       rating: reviewRating,
       title: reviewTitle.trim(),
       comment: reviewComment.trim(),
@@ -85,7 +85,7 @@ export const ProductDetailPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-zinc-500">
+      <nav className="flex items-center gap-2 text-xs text-zinc-500 flex-wrap">
         <button onClick={() => navigateTo('home')} className="hover:text-zinc-900 cursor-pointer">
           Home
         </button>
@@ -96,6 +96,17 @@ export const ProductDetailPage: React.FC = () => {
         >
           {product.category}
         </button>
+        {product.subcategory && (
+          <>
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+            <button
+              onClick={() => navigateTo('shop', product.category, product.subcategory)}
+              className="hover:text-zinc-900 cursor-pointer font-medium text-[#E86A92]"
+            >
+              {product.subcategory}
+            </button>
+          </>
+        )}
         <ChevronRight className="w-3 h-3 text-zinc-400" />
         <span className="text-zinc-900 font-semibold truncate max-w-xs">{product.name}</span>
       </nav>

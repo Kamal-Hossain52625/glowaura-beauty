@@ -46,11 +46,13 @@ interface StoreContextType {
   // Navigation & View
   activeView: AppView;
   setActiveView: (view: AppView) => void;
-  navigateTo: (view: AppView, param?: string) => void;
+  navigateTo: (view: AppView, param?: string, subparam?: string) => void;
   selectedProductSlug: string | null;
   setSelectedProductSlug: (slug: string | null) => void;
   selectedCategory: string | null;
   setSelectedCategory: (cat: string | null) => void;
+  selectedSubcategory: string | null;
+  setSelectedSubcategory: (subcat: string | null) => void;
   selectedBrand: string | null;
   setSelectedBrand: (brand: string | null) => void;
 
@@ -253,6 +255,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     initialRoute.view === 'shop' && initialRoute.param ? initialRoute.param : null
   );
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
 
   // Modals & UI
@@ -269,53 +272,55 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Persistent State with Fallback to Initial Data
   const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('glowaura_products');
+    const saved = localStorage.getItem('ayat_amat_products_v2');
     return saved ? JSON.parse(saved) : INITIAL_PRODUCTS_LIST;
   });
 
   const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('glowaura_categories');
+    const saved = localStorage.getItem('ayat_amat_categories_v2');
     return saved ? JSON.parse(saved) : INITIAL_CATEGORIES_LIST;
   });
 
   const [brands, setBrands] = useState<Brand[]>(() => {
-    const saved = localStorage.getItem('glowaura_brands');
+    const saved = localStorage.getItem('ayat_amat_brands_v2');
     return saved ? JSON.parse(saved) : INITIAL_BRANDS_LIST;
   });
 
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('glowaura_cart');
+    const saved = localStorage.getItem('ayat_amat_cart_v2');
     return saved ? JSON.parse(saved) : [];
   });
 
   const [wishlist, setWishlist] = useState<string[]>(() => {
-    const saved = localStorage.getItem('glowaura_wishlist');
-    return saved ? JSON.parse(saved) : ['prod-1', 'prod-2'];
+    const saved = localStorage.getItem('ayat_amat_wishlist_v2');
+    return saved ? JSON.parse(saved) : ['prod-m-shirt-1', 'prod-m-clock-1'];
   });
 
   const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('glowaura_orders');
+    const saved = localStorage.getItem('ayat_amat_orders_v2');
     return saved ? JSON.parse(saved) : INITIAL_ORDERS;
   });
 
   const [reviews, setReviews] = useState<Review[]>(() => {
-    const saved = localStorage.getItem('glowaura_reviews');
+    const saved = localStorage.getItem('ayat_amat_reviews_v2');
     return saved ? JSON.parse(saved) : INITIAL_REVIEWS;
   });
 
   const [coupons, setCoupons] = useState<Coupon[]>(() => {
-    const saved = localStorage.getItem('glowaura_coupons');
+    const saved = localStorage.getItem('ayat_amat_coupons_v2');
     return saved ? JSON.parse(saved) : INITIAL_COUPONS;
   });
 
   const [settings, setSettings] = useState<StoreSettings>(() => {
-    const saved = localStorage.getItem('glowaura_settings');
+    const saved = localStorage.getItem('ayat_amat_settings_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         return {
           ...INITIAL_SETTINGS,
           ...parsed,
+          storeName: "Ayat & Amat",
+          supportEmail: "support@ayatamat.com",
           deliveryInsideDhaka: 70,
           deliverySubDhaka: 100,
           deliveryOutsideDhaka: 130
@@ -361,31 +366,39 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Sync to local storage
   useEffect(() => {
-    localStorage.setItem('glowaura_products', JSON.stringify(products));
+    localStorage.setItem('ayat_amat_products_v2', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem('glowaura_cart', JSON.stringify(cart));
+    localStorage.setItem('ayat_amat_categories_v2', JSON.stringify(categories));
+  }, [categories]);
+
+  useEffect(() => {
+    localStorage.setItem('ayat_amat_brands_v2', JSON.stringify(brands));
+  }, [brands]);
+
+  useEffect(() => {
+    localStorage.setItem('ayat_amat_cart_v2', JSON.stringify(cart));
   }, [cart]);
 
   useEffect(() => {
-    localStorage.setItem('glowaura_wishlist', JSON.stringify(wishlist));
+    localStorage.setItem('ayat_amat_wishlist_v2', JSON.stringify(wishlist));
   }, [wishlist]);
 
   useEffect(() => {
-    localStorage.setItem('glowaura_orders', JSON.stringify(orders));
+    localStorage.setItem('ayat_amat_orders_v2', JSON.stringify(orders));
   }, [orders]);
 
   useEffect(() => {
-    localStorage.setItem('glowaura_reviews', JSON.stringify(reviews));
+    localStorage.setItem('ayat_amat_reviews_v2', JSON.stringify(reviews));
   }, [reviews]);
 
   useEffect(() => {
-    localStorage.setItem('glowaura_coupons', JSON.stringify(coupons));
+    localStorage.setItem('ayat_amat_coupons_v2', JSON.stringify(coupons));
   }, [coupons]);
 
   useEffect(() => {
-    localStorage.setItem('glowaura_settings', JSON.stringify(settings));
+    localStorage.setItem('ayat_amat_settings_v2', JSON.stringify(settings));
   }, [settings]);
 
   useEffect(() => {
@@ -446,13 +459,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  const navigateTo = (view: AppView, param?: string) => {
+  const navigateTo = (view: AppView, param?: string, subparam?: string) => {
     setActiveView(view);
     if (view === 'product-detail' && param) {
       setSelectedProductSlug(param);
     }
-    if (view === 'shop' && param) {
-      setSelectedCategory(param);
+    if (view === 'shop') {
+      setSelectedCategory(param || null);
+      setSelectedSubcategory(subparam || null);
     }
 
     // Determine target URL path
@@ -1006,6 +1020,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedProductSlug,
         selectedCategory,
         setSelectedCategory,
+        selectedSubcategory,
+        setSelectedSubcategory,
         selectedBrand,
         setSelectedBrand,
 

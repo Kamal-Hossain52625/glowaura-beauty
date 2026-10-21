@@ -54,36 +54,36 @@ import {
   LogOut
 } from 'lucide-react';
 
-const BEAUTY_IMAGE_PRESETS = [
+const FASHION_IMAGE_PRESETS = [
   {
-    name: 'Hydrating Serum',
-    url: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
-    tag: 'Serum'
+    name: "Men's Formal Shirt",
+    url: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
+    tag: 'Shirt'
   },
   {
-    name: 'Relief Sunscreen SPF50+',
-    url: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=600&q=80',
-    tag: 'Sun Care'
+    name: 'Pique Cotton Polo T-Shirt',
+    url: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80',
+    tag: 'T-Shirt'
   },
   {
-    name: 'Water Sleeping Mask',
-    url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
-    tag: 'Moisturizer'
+    name: 'Tailored Chino Pants',
+    url: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80',
+    tag: 'Pant'
   },
   {
-    name: 'Velvet Matte Lipstick',
-    url: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=600&q=80',
-    tag: 'Lip Care'
+    name: 'Steel Chronograph Clock / Watch',
+    url: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80',
+    tag: 'Clock'
   },
   {
-    name: 'Low pH Gentle Cleanser',
-    url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
-    tag: 'Cleanser'
+    name: 'Dhakai Jamdani Saree',
+    url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+    tag: 'Saree'
   },
   {
-    name: 'Hydra Essence Toner',
-    url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
-    tag: 'Toner'
+    name: 'Organic Baby Romper',
+    url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80',
+    tag: 'Baby'
   }
 ];
 
@@ -3013,7 +3013,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Preset Chips */}
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
                   <span className="text-[11px] text-zinc-400 font-medium">Quick Presets:</span>
-                  {BEAUTY_IMAGE_PRESETS.map((preset, idx) => (
+                  {FASHION_IMAGE_PRESETS.map((preset, idx) => (
                     <button
                       key={idx}
                       type="button"

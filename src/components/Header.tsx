@@ -91,17 +91,17 @@ export const Header: React.FC = () => {
           {/* Logo */}
           <div
             onClick={() => navigateTo('home')}
-            className="cursor-pointer flex items-center gap-2 select-none group"
+            className="cursor-pointer flex items-center gap-2.5 select-none group"
           >
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#E86A92] to-[#f49cb8] flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E86A92] to-[#f49cb8] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform font-display font-black text-sm tracking-wider">
+              A&A
             </div>
             <div>
-              <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#222222] block leading-none">
-                GlowAura<span className="text-[#E86A92]">.</span>
+              <span className="font-display text-xl sm:text-2xl font-black tracking-tight text-[#222222] block leading-none">
+                Ayat & Amat<span className="text-[#E86A92]">.</span>
               </span>
-              <span className="text-[10px] tracking-widest uppercase text-[#777777] block font-medium">
-                Authentic BD Beauty
+              <span className="text-[10px] tracking-widest uppercase text-[#777777] block font-semibold mt-0.5">
+                Fashion & Lifestyle
               </span>
             </div>
           </div>
@@ -111,7 +111,7 @@ export const Header: React.FC = () => {
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
-                placeholder="Search Korean serums, sunscreens, COSRX, The Ordinary..."
+                placeholder="Search Shirt, T-Shirt, Pant, Clock, Saree, Baby sets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
@@ -178,7 +178,7 @@ export const Header: React.FC = () => {
                   </div>
                 ) : (
                   <div className="p-6 text-center text-sm text-zinc-500">
-                    No beauty products matching &ldquo;{searchQuery}&rdquo;
+                    No products matching &ldquo;{searchQuery}&rdquo; in Ayat & Amat
                   </div>
                 )}
               </div>
@@ -313,7 +313,7 @@ export const Header: React.FC = () => {
           <form onSubmit={handleSearchSubmit} className="relative">
             <input
               type="text"
-              placeholder="Search Korean skincare, makeup..."
+              placeholder="Search Shirt, T-Shirt, Pant, Clock, Saree, Baby sets..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#F8E8EE]/40 border border-[#F8E8EE] text-xs text-[#222222] pl-3 pr-9 py-2 rounded-full outline-hidden"
@@ -328,43 +328,202 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories Navigation Bar */}
-      <nav className="border-t border-[#F8E8EE] bg-white hidden md:block">
+      {/* Collections Mega Navigation Bar */}
+      <nav className="border-t border-[#F8E8EE] bg-white hidden md:block relative">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between overflow-x-auto py-2.5 text-xs font-medium no-scrollbar">
-            <button
-              onClick={() => navigateTo('home')}
-              className={`hover:text-[#E86A92] transition-colors whitespace-nowrap cursor-pointer ${
-                activeView === 'home' ? 'text-[#E86A92] font-bold' : 'text-zinc-700'
-              }`}
-            >
-              Home
-            </button>
-
-            <button
-              onClick={() => navigateTo('shop')}
-              className={`hover:text-[#E86A92] transition-colors whitespace-nowrap cursor-pointer ${
-                activeView === 'shop' ? 'text-[#E86A92] font-bold' : 'text-zinc-700'
-              }`}
-            >
-              All Products
-            </button>
-
-            {categories.slice(0, 8).map((cat) => (
+          <div className="flex items-center justify-between py-2 text-xs font-semibold">
+            <div className="flex items-center gap-6">
               <button
-                key={cat.id}
-                onClick={() => navigateTo('shop', cat.name)}
-                className="text-zinc-700 hover:text-[#E86A92] transition-colors whitespace-nowrap cursor-pointer"
+                onClick={() => navigateTo('home')}
+                className={`hover:text-[#E86A92] transition-colors whitespace-nowrap cursor-pointer py-1.5 ${
+                  activeView === 'home' ? 'text-[#E86A92] font-bold' : 'text-zinc-700'
+                }`}
               >
-                {cat.name}
+                Home
               </button>
-            ))}
+
+              {/* All Products with Full Mega Menu Dropdown */}
+              <div className="relative group/all py-1.5">
+                <button
+                  onClick={() => navigateTo('shop')}
+                  className={`hover:text-[#E86A92] transition-colors whitespace-nowrap cursor-pointer py-1.5 flex items-center gap-1.5 ${
+                    activeView === 'shop' ? 'text-[#E86A92] font-bold' : 'text-zinc-700'
+                  }`}
+                >
+                  <Package className="w-3.5 h-3.5 text-[#E86A92]" />
+                  <span>All Products</span>
+                  <ChevronDown className="w-3 h-3 text-zinc-400 group-hover/all:text-[#E86A92] transition-transform group-hover/all:rotate-180" />
+                </button>
+
+                {/* Mega Menu Dropdown for All Products */}
+                <div className="absolute left-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover/all:opacity-100 group-hover/all:translate-y-0 group-hover/all:pointer-events-auto transition-all duration-200 z-50">
+                  <div className="bg-white rounded-2xl shadow-2xl border border-pink-100 p-6 w-[740px] max-w-[90vw]">
+                    {/* Header */}
+                    <div className="flex items-center justify-between pb-3 mb-4 border-b border-zinc-100">
+                      <div>
+                        <h4 className="font-display font-bold text-sm text-zinc-900 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-[#E86A92]"></span>
+                          Ayat & Amat - All Products Catalog
+                        </h4>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">
+                          Browse all collections: Men's (Shirt, T-Shirt, Pant, Clock), Women's & Baby items
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => navigateTo('shop')}
+                        className="text-xs font-bold text-[#E86A92] hover:text-[#d6577e] flex items-center gap-1 cursor-pointer bg-pink-50 px-3 py-1.5 rounded-lg border border-pink-100"
+                      >
+                        View All Products ({products.length}) →
+                      </button>
+                    </div>
+
+                    {/* 3 Categories / Collections Grid */}
+                    <div className="grid grid-cols-3 gap-5">
+                      {/* Men's Collection */}
+                      <div className="bg-zinc-50/70 rounded-xl p-3.5 border border-zinc-100 hover:border-pink-200 transition-colors">
+                        <div
+                          onClick={() => navigateTo('shop', "Men's Collection")}
+                          className="flex items-center justify-between font-bold text-xs text-zinc-900 pb-2 border-b border-zinc-200/80 cursor-pointer group/title"
+                        >
+                          <span className="group-hover/title:text-[#E86A92] transition-colors flex items-center gap-1.5">
+                            👔 Men's Collection
+                          </span>
+                          <span className="text-[10px] text-zinc-400 group-hover/title:text-[#E86A92]">All →</span>
+                        </div>
+                        <div className="mt-2.5 space-y-1">
+                          {['Shirt', 'T-Shirt', 'Pant', 'Clock'].map((item) => (
+                            <button
+                              key={item}
+                              onClick={() => navigateTo('shop', "Men's Collection", item)}
+                              className="w-full text-left px-2 py-1.5 rounded-lg text-xs text-zinc-600 hover:bg-white hover:text-[#E86A92] hover:shadow-xs font-medium transition-all cursor-pointer flex items-center justify-between"
+                            >
+                              <span>{item}</span>
+                              <span className="text-[10px] text-zinc-400">
+                                {products.filter((p) => p.category === "Men's Collection" && p.subcategory === item).length}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Women's Collection */}
+                      <div className="bg-zinc-50/70 rounded-xl p-3.5 border border-zinc-100 hover:border-pink-200 transition-colors">
+                        <div
+                          onClick={() => navigateTo('shop', "Women's Collection")}
+                          className="flex items-center justify-between font-bold text-xs text-zinc-900 pb-2 border-b border-zinc-200/80 cursor-pointer group/title"
+                        >
+                          <span className="group-hover/title:text-[#E86A92] transition-colors flex items-center gap-1.5">
+                            👗 Women's Collection
+                          </span>
+                          <span className="text-[10px] text-zinc-400 group-hover/title:text-[#E86A92]">All →</span>
+                        </div>
+                        <div className="mt-2.5 space-y-1">
+                          {['Three Piece', 'Kurti & Tops', 'Saree', 'Clock & Jewelry'].map((item) => (
+                            <button
+                              key={item}
+                              onClick={() => navigateTo('shop', "Women's Collection", item)}
+                              className="w-full text-left px-2 py-1.5 rounded-lg text-xs text-zinc-600 hover:bg-white hover:text-[#E86A92] hover:shadow-xs font-medium transition-all cursor-pointer flex items-center justify-between"
+                            >
+                              <span>{item}</span>
+                              <span className="text-[10px] text-zinc-400">
+                                {products.filter((p) => p.category === "Women's Collection" && p.subcategory === item).length}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Baby Collection */}
+                      <div className="bg-zinc-50/70 rounded-xl p-3.5 border border-zinc-100 hover:border-pink-200 transition-colors">
+                        <div
+                          onClick={() => navigateTo('shop', "Baby Collection")}
+                          className="flex items-center justify-between font-bold text-xs text-zinc-900 pb-2 border-b border-zinc-200/80 cursor-pointer group/title"
+                        >
+                          <span className="group-hover/title:text-[#E86A92] transition-colors flex items-center gap-1.5">
+                            🍼 Baby Collection
+                          </span>
+                          <span className="text-[10px] text-zinc-400 group-hover/title:text-[#E86A92]">All →</span>
+                        </div>
+                        <div className="mt-2.5 space-y-1">
+                          {['Baby Boys Clothing', 'Baby Girls Clothing', 'Rompers & Sets', 'Baby Clock & Toys'].map((item) => (
+                            <button
+                              key={item}
+                              onClick={() => navigateTo('shop', "Baby Collection", item)}
+                              className="w-full text-left px-2 py-1.5 rounded-lg text-xs text-zinc-600 hover:bg-white hover:text-[#E86A92] hover:shadow-xs font-medium transition-all cursor-pointer flex items-center justify-between"
+                            >
+                              <span>{item}</span>
+                              <span className="text-[10px] text-zinc-400">
+                                {products.filter((p) => p.category === "Baby Collection" && p.subcategory === item).length}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Info Strip */}
+                    <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-500">
+                      <span className="flex items-center gap-1.5">
+                        <Truck className="w-3.5 h-3.5 text-[#E86A92]" />
+                        Delivery: Inside Dhaka ৳70 | Sub Area ৳100 | Outside Dhaka ৳130
+                      </span>
+                      <span className="font-semibold text-emerald-600">
+                        ✓ Free Delivery on orders over ৳2,500
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Collections with Direct Individual Dropdowns */}
+              {categories.map((cat) => (
+                <div key={cat.id} className="relative group py-1.5">
+                  <button
+                    onClick={() => navigateTo('shop', cat.name)}
+                    className="flex items-center gap-1.5 text-zinc-700 hover:text-[#E86A92] transition-colors whitespace-nowrap cursor-pointer"
+                  >
+                    <span>{cat.name}</span>
+                    <ChevronDown className="w-3 h-3 text-zinc-400 group-hover:text-[#E86A92] transition-transform group-hover:rotate-180" />
+                  </button>
+
+                  {/* Individual Collection Mega Menu Dropdown */}
+                  <div className="absolute left-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                    <div className="bg-white rounded-2xl shadow-xl border border-pink-100 p-4 w-64 space-y-2">
+                      <div className="flex items-center justify-between pb-2 border-b border-zinc-100">
+                        <span className="font-bold text-xs text-zinc-900">{cat.name}</span>
+                        <button
+                          onClick={() => navigateTo('shop', cat.name)}
+                          className="text-[10px] text-[#E86A92] font-bold hover:underline"
+                        >
+                          View All →
+                        </button>
+                      </div>
+
+                      <div className="space-y-1">
+                        {cat.subcategories.map((sub) => (
+                          <button
+                            key={sub}
+                            onClick={() => navigateTo('shop', cat.name, sub)}
+                            className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 hover:bg-pink-50 hover:text-[#E86A92] font-medium transition-colors cursor-pointer flex items-center justify-between"
+                          >
+                            <span>{sub}</span>
+                            <span className="text-[10px] text-zinc-400 group-hover/item:text-[#E86A92]">
+                              {products.filter((p) => p.category === cat.name && p.subcategory === sub).length}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             <button
               onClick={() => navigateTo('shop')}
-              className="text-[#E86A92] font-bold hover:text-[#d6577e] transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer"
+              className="text-[#E86A92] font-bold hover:text-[#d6577e] transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer bg-pink-50/80 px-3 py-1 rounded-full border border-pink-200"
             >
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className="w-3 h-3 text-[#E86A92]" />
               Special Offers %
             </button>
           </div>
@@ -373,7 +532,7 @@ export const Header: React.FC = () => {
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-[#F8E8EE] bg-white px-4 py-4 space-y-3 animate-in slide-in-from-top-2">
+        <div className="md:hidden border-t border-[#F8E8EE] bg-white px-4 py-4 space-y-4 animate-in slide-in-from-top-2 max-h-[85vh] overflow-y-auto">
           <div className="pb-3 border-b border-zinc-100">
             <button
               onClick={() => {
@@ -387,37 +546,52 @@ export const Header: React.FC = () => {
             </button>
           </div>
 
-          <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-            Beauty Categories
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="space-y-3">
             <button
               onClick={() => {
                 navigateTo('shop');
                 setIsMobileMenuOpen(false);
               }}
-              className="text-left py-1.5 text-zinc-800 font-semibold hover:text-[#E86A92]"
+              className="w-full text-left py-2 px-3 bg-pink-50/60 rounded-xl text-xs font-bold text-[#E86A92] flex items-center justify-between"
             >
-              All Catalog
+              <span>All Products Catalog</span>
+              <span>→</span>
             </button>
+
             {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  navigateTo('shop', cat.name);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left py-1.5 text-zinc-700 hover:text-[#E86A92]"
-              >
-                {cat.name}
-              </button>
+              <div key={cat.id} className="border border-zinc-100 rounded-2xl p-3 space-y-2 bg-zinc-50/50">
+                <div
+                  onClick={() => {
+                    navigateTo('shop', cat.name);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="font-bold text-xs text-zinc-900 cursor-pointer flex items-center justify-between"
+                >
+                  <span>{cat.name}</span>
+                  <span className="text-[10px] text-[#E86A92] font-semibold">View All</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                  {cat.subcategories.map((sub) => (
+                    <button
+                      key={sub}
+                      onClick={() => {
+                        navigateTo('shop', cat.name, sub);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="text-left py-1 px-2 text-[11px] text-zinc-600 hover:text-[#E86A92] hover:bg-pink-50 rounded-md transition-colors"
+                    >
+                      • {sub}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
 
           <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500">
             <span className="flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              100% Authentic BD
+              100% Authentic Products
             </span>
             <button
               onClick={() => {
@@ -426,7 +600,7 @@ export const Header: React.FC = () => {
               }}
               className="text-[#E86A92] font-semibold"
             >
-              Track My Order
+              Track Order
             </button>
           </div>
         </div>

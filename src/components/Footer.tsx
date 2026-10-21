@@ -36,8 +36,8 @@ export const Footer: React.FC = () => {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white">100% Authentic Products</h4>
-              <p className="text-xs text-zinc-400 mt-1">Directly imported from South Korea, Japan, France & USA with authentic batch codes.</p>
+              <h4 className="text-sm font-semibold text-white">100% Authentic Quality</h4>
+              <p className="text-xs text-zinc-400 mt-1">Premium fabrics, genuine watches & clock movements, and handloom artisan weaves.</p>
             </div>
           </div>
 
@@ -47,7 +47,7 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white">All Bangladesh Express Delivery</h4>
-              <p className="text-xs text-zinc-400 mt-1">Inside Dhaka 24-48 hours (৳60), All 64 Districts 48-72 hours via Steadfast courier.</p>
+              <p className="text-xs text-zinc-400 mt-1">Inside Dhaka ৳70, Sub Area ৳100, Outside Dhaka ৳130. Fast delivery to all 64 districts.</p>
             </div>
           </div>
 
@@ -56,8 +56,8 @@ export const Footer: React.FC = () => {
               <RotateCcw className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white">Easy Return Policy</h4>
-              <p className="text-xs text-zinc-400 mt-1">Hassle-free 3-day replacement policy for damaged or transit-affected deliveries.</p>
+              <h4 className="text-sm font-semibold text-white">Easy Exchange & Return</h4>
+              <p className="text-xs text-zinc-400 mt-1">Simple 3-day size replacement and defect guarantee for total customer satisfaction.</p>
             </div>
           </div>
 
@@ -66,8 +66,8 @@ export const Footer: React.FC = () => {
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white">Free Skin Consultation</h4>
-              <p className="text-xs text-zinc-400 mt-1">Talk with our certified skin consultants to find the ideal routine for your skin type.</p>
+              <h4 className="text-sm font-semibold text-white">Dedicated Support</h4>
+              <p className="text-xs text-zinc-400 mt-1">Direct support hotline for sizing, order tracking, and custom packaging queries.</p>
             </div>
           </div>
         </div>
@@ -77,20 +77,20 @@ export const Footer: React.FC = () => {
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#E86A92] flex items-center justify-center text-white">
-                <Sparkles className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-full bg-[#E86A92] flex items-center justify-center text-white font-bold text-xs">
+                A&A
               </div>
               <span className="font-display text-xl font-bold text-white tracking-tight">
-                GlowAura<span className="text-[#E86A92]">.</span>
+                Ayat & Amat<span className="text-[#E86A92]">.</span>
               </span>
             </div>
             <p className="text-zinc-400 text-xs leading-relaxed max-w-sm">
-              Your most trusted online destination in Bangladesh for authentic Korean and international skincare, makeup, and personal wellness essentials.
+              Your destination in Bangladesh for Men's Collection (Shirt, T-Shirt, Pant, Clock), Women's Collection, and Baby Collection.
             </p>
             <div className="space-y-2 text-zinc-400">
               <p className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#E86A92] shrink-0" />
-                <span>Banani Experience Store: Road 11, Block D, Dhaka</span>
+                <span>Showroom & Hub: Road 11, Banani, Dhaka, Bangladesh</span>
               </p>
               <p className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#E86A92] shrink-0" />
@@ -106,32 +106,32 @@ export const Footer: React.FC = () => {
           {/* Quick Categories */}
           <div>
             <h5 className="font-bold text-white mb-4 uppercase tracking-wider text-[11px]">
-              Categories
+              Collections
             </h5>
             <ul className="space-y-2.5 text-zinc-400">
               <li>
-                <button onClick={() => navigateTo('shop', 'Skincare')} className="hover:text-white transition-colors cursor-pointer">
-                  Korean Skincare
+                <button onClick={() => navigateTo('shop', "Men's Collection")} className="hover:text-white transition-colors cursor-pointer">
+                  Men's Collection
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('shop', 'Sun Care')} className="hover:text-white transition-colors cursor-pointer">
-                  Sun Protection
+                <button onClick={() => navigateTo('shop', "Men's Collection", "Shirt")} className="hover:text-white transition-colors cursor-pointer pl-2 text-zinc-400">
+                  • Men's Shirt
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('shop', 'Makeup')} className="hover:text-white transition-colors cursor-pointer">
-                  Face Makeup & Tints
+                <button onClick={() => navigateTo('shop', "Men's Collection", "Clock")} className="hover:text-white transition-colors cursor-pointer pl-2 text-zinc-400">
+                  • Men's Clock / Watch
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('shop', 'Lip Care')} className="hover:text-white transition-colors cursor-pointer">
-                  Lip Balms & Masks
+                <button onClick={() => navigateTo('shop', "Women's Collection")} className="hover:text-white transition-colors cursor-pointer">
+                  Women's Collection
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('shop', 'Hair Care')} className="hover:text-white transition-colors cursor-pointer">
-                  Scalp & Hair Care
+                <button onClick={() => navigateTo('shop', "Baby Collection")} className="hover:text-white transition-colors cursor-pointer">
+                  Baby Collection
                 </button>
               </li>
             </ul>
@@ -199,7 +199,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar: Bangladesh Payment Badges & Copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <div>
-            © {new Date().getFullYear()} GlowAura Beauty BD. All rights reserved. Built with Laravel 12 + Vue 3 + MySQL architecture.
+            © {new Date().getFullYear()} Ayat & Amat Fashion & Lifestyle BD. All rights reserved.
           </div>
 
           {/* Payment Method Badges */}
