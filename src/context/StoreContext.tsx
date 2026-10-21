@@ -24,6 +24,7 @@ import {
   INITIAL_USER,
   INITIAL_ADMIN_ACCOUNTS
 } from '../data/mockData';
+import { supabaseService, supabaseConfig } from '../lib/supabase';
 
 export type AppView =
   | 'home'
@@ -163,6 +164,10 @@ interface StoreContextType {
 
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
+
+  // Supabase Backend Integration
+  supabaseStatus: { connected: boolean; tablesFound: boolean; error?: string };
+  syncWithSupabase: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -363,6 +368,66 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [currentUser]);
 
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+
+  // Supabase live backend state
+  const [supabaseStatus, setSupabaseStatus] = useState<{ connected: boolean; tablesFound: boolean; error?: string }>({
+    connected: false,
+    tablesFound: false
+  });
+
+  const syncWithSupabase = async () => {
+    try {
+      const status = await supabaseService.testConnection();
+      setSupabaseStatus(status);
+      if (status.tablesFound) {
+        const [remoteProducts, remoteOrders] = await Promise.all([
+          supabaseService.fetchProducts(),
+          supabaseService.fetchOrders()
+        ]);
+        if (remoteProducts && remoteProducts.length > 0) {
+          setProducts(remoteProducts);
+        }
+        if (remoteOrders && remoteOrders.length > 0) {
+          setOrders(remoteOrders);
+        }
+        showToast('Supabase ব্যাকএন্ডের সাথে ডেটা সিঙ্ক সম্পন্ন হয়েছে! 🚀', 'success');
+      } else {
+        showToast('Supabase কানেক্টেড, কিন্তু টেবিলগুলো SQL এডিটরে রান করা বাকি।', 'info');
+      }
+    } catch (err: any) {
+      console.warn('Sync error:', err);
+      showToast('সিঙ্ক করতে সমস্যা হয়েছে। অনুগ্রহ করে ইন্টারনেট ও সেটিংস চেক করুন।', 'error');
+    }
+  };
+
+  // Check Supabase connection and load remote products & orders on boot
+  useEffect(() => {
+    let isMounted = true;
+    async function initSupabase() {
+      try {
+        const status = await supabaseService.testConnection();
+        if (isMounted) {
+          setSupabaseStatus(status);
+        }
+        if (status.tablesFound) {
+          const [remoteProducts, remoteOrders] = await Promise.all([
+            supabaseService.fetchProducts(),
+            supabaseService.fetchOrders()
+          ]);
+          if (isMounted) {
+            if (remoteProducts && remoteProducts.length > 0) setProducts(remoteProducts);
+            if (remoteOrders && remoteOrders.length > 0) setOrders(remoteOrders);
+          }
+        }
+      } catch (e) {
+        console.warn('Supabase init notice:', e);
+      }
+    }
+    initSupabase();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Sync to local storage
   useEffect(() => {
@@ -632,7 +697,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     transactionId?: string;
     deliveryCharge?: number;
   }): Order => {
-    const orderNum = `GLOW-BD-${Math.floor(10000 + Math.random() * 90000)}`;
+    const orderNum = `AYAT-BD-${Math.floor(10000 + Math.random() * 90000)}`;
     const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
 
     const orderItems = cart.map((c) => ({
@@ -684,6 +749,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setOrders((prev) => [newOrder, ...prev]);
 
+    // Persist asynchronously to Supabase orders table
+    supabaseService.insertOrder(newOrder).catch((err) => {
+      console.warn('Supabase order sync note:', err);
+    });
+
     // Update coupon usage if applied
     if (appliedCoupon) {
       setCoupons((prev) =>
@@ -727,6 +797,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       })
     );
     showToast(`Order updated to: ${status.toUpperCase()}`, 'success');
+    supabaseService.updateOrderStatus(orderId, status);
   };
 
   const activeTrackingOrder =
@@ -793,6 +864,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `prod-${Date.now()}`
     };
     setProducts((prev) => [newProduct, ...prev]);
+    supabaseService.insertProduct(newProduct);
     showToast(`Product "${payload.name.slice(0, 24)}..." added!`, 'success');
   };
 
@@ -1101,7 +1173,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleSubAdminStatus,
         adminLogin,
         showToast,
-        removeToast
+        removeToast,
+
+        // Supabase Backend Integration
+        supabaseStatus,
+        syncWithSupabase
       }}
     >
       {children}
