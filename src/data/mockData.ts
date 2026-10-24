@@ -1098,7 +1098,7 @@ export const INITIAL_ADMIN_ACCOUNTS: AdminAccount[] = [
     id: "admin-super-1",
     name: "Ayat & Amat (Super Admin)",
     email: "admin@ayatamat.com",
-    password: "password123",
+    password: "", // Passwords are now securely stored and verified in Supabase database
     role: "super_admin",
     phone: "01711234567",
     permissions: ["all"],
@@ -1109,7 +1109,7 @@ export const INITIAL_ADMIN_ACCOUNTS: AdminAccount[] = [
     id: "admin-sub-1",
     name: "Tariqul Islam (Dispatch Manager)",
     email: "subadmin@ayatamat.com",
-    password: "password123",
+    password: "",
     role: "sub_admin",
     phone: "01819283746",
     permissions: ["orders", "tracking"],

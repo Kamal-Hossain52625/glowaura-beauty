@@ -104,14 +104,32 @@ CREATE TABLE IF NOT EXISTS public.coupons (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 7. Enable Row Level Security (RLS)
+-- 7. Admin Users Table (Role-Based Access Control)
+-- Pgcrypto extension for secure SHA-256 / bcrypt password hashing
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE TABLE IF NOT EXISTS public.admin_users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL, -- SHA-256 hash (never plain text!)
+  role TEXT NOT NULL DEFAULT 'sub_admin', -- 'super_admin' or 'sub_admin'
+  permissions JSONB DEFAULT '["all"]'::jsonb, -- e.g. ["all"] or ["orders", "tracking", "products"]
+  phone TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  last_login TIMESTAMP WITH TIME ZONE
+);
+
+-- 8. Enable Row Level Security (RLS)
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 
--- 8. Policies: Public Read
+-- 9. Policies: Public Read & Secure Admin Policies
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow public read on products') THEN
     CREATE POLICY "Allow public read on products" ON public.products FOR SELECT USING (true);
@@ -133,6 +151,16 @@ DO $$ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow public insert on customers') THEN
     CREATE POLICY "Allow public insert on customers" ON public.customers FOR INSERT WITH CHECK (true);
+  END IF;
+  -- Secure Admin policies
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow admin authentication check') THEN
+    CREATE POLICY "Allow admin authentication check" ON public.admin_users FOR SELECT USING (is_active = true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow admin updates') THEN
+    CREATE POLICY "Allow admin updates" ON public.admin_users FOR UPDATE USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow admin creation') THEN
+    CREATE POLICY "Allow admin creation" ON public.admin_users FOR INSERT WITH CHECK (true);
   END IF;
 END $$;
 

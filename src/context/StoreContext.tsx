@@ -24,7 +24,7 @@ import {
   INITIAL_USER,
   INITIAL_ADMIN_ACCOUNTS
 } from '../data/mockData';
-import { supabaseService, supabaseConfig } from '../lib/supabase';
+import { supabaseService, supabaseConfig, hashPassword } from '../lib/supabase';
 
 export type AppView =
   | 'home'
@@ -146,6 +146,13 @@ interface StoreContextType {
   // Auth
   login: (email: string, role?: 'customer' | 'admin') => void;
   loginWithPhone: (phone: string, name?: string) => void;
+  customerLogin: (email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
+  customerRegister: (data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }) => Promise<{ success: boolean; message: string; user?: User }>;
   updateUserProfile: (updated: Partial<User>) => void;
   logout: () => void;
 
@@ -157,10 +164,10 @@ interface StoreContextType {
     password: string;
     phone?: string;
     permissions: string[];
-  }) => { success: boolean; message: string };
+  }) => Promise<{ success: boolean; message: string }>;
   deleteSubAdmin: (id: string) => { success: boolean; message: string };
   toggleSubAdminStatus: (id: string) => void;
-  adminLogin: (email: string, password: string) => { success: boolean; message: string; user?: User };
+  adminLogin: (email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
 
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
@@ -410,13 +417,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setSupabaseStatus(status);
         }
         if (status.tablesFound) {
-          const [remoteProducts, remoteOrders] = await Promise.all([
+          const [remoteProducts, remoteOrders, remoteAdmins] = await Promise.all([
             supabaseService.fetchProducts(),
-            supabaseService.fetchOrders()
+            supabaseService.fetchOrders(),
+            supabaseService.fetchAdmins()
           ]);
           if (isMounted) {
             if (remoteProducts && remoteProducts.length > 0) setProducts(remoteProducts);
             if (remoteOrders && remoteOrders.length > 0) setOrders(remoteOrders);
+            if (remoteAdmins && remoteAdmins.length > 0) setAdminAccounts(remoteAdmins);
           }
         }
       } catch (e) {
@@ -492,22 +501,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const handleUrlChange = () => {
       const route = resolveViewFromLocation();
       setActiveView(route.view);
-      if (route.view === 'admin') {
-        setCurrentUser((prev) => {
-          if (!prev || prev.role !== 'admin') {
-            return {
-              id: 'admin-1',
-              name: 'Store Manager (Super Admin)',
-              email: 'admin@glowaurabd.com',
-              phone: '01711234567',
-              defaultDistrict: 'Dhaka',
-              defaultAddress: 'Gulshan 2, Dhaka, Bangladesh',
-              role: 'admin'
-            };
-          }
-          return prev;
-        });
-      }
       if (route.view === 'product-detail' && route.param) {
         setSelectedProductSlug(route.param);
       }
@@ -939,7 +932,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const mockUser: User = {
       id: role === 'admin' ? 'admin-1' : 'user-1',
       name: role === 'admin' ? 'Store Manager (Admin)' : 'Maria Afrin',
-      email: email || (role === 'admin' ? 'admin@glowaurabd.com' : 'mariaafrin1106@gmail.com'),
+      email: email || (role === 'admin' ? 'admin@ayatamat.com' : 'mariaafrin1106@gmail.com'),
       phone: '01789123456',
       defaultDistrict: 'Dhaka',
       defaultAddress: 'House 42, Road 27, Dhanmondi, Dhaka',
@@ -969,6 +962,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast(`Welcome, ${customerUser.name}! Signed in with ${customerUser.phone}`, 'success');
   };
 
+  const customerLogin = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; message: string; user?: User }> => {
+    const res = await supabaseService.customerLogin(email, password);
+    if (res.success && res.user) {
+      setCurrentUser(res.user);
+      showToast(`স্বাগতম, ${res.user.name}!`, 'success');
+    }
+    return res;
+  };
+
+  const customerRegister = async (data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }): Promise<{ success: boolean; message: string; user?: User }> => {
+    const res = await supabaseService.registerCustomer(data);
+    if (res.success && res.user) {
+      setCurrentUser(res.user);
+      showToast(`স্বাগতম, ${res.user.name}! রেজিস্ট্রেশন সম্পন্ন হয়েছে।`, 'success');
+    }
+    return res;
+  };
+
   const updateUserProfile = (updated: Partial<User>) => {
     if (currentUser) {
       const newUser = { ...currentUser, ...updated };
@@ -982,61 +1001,96 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('Signed out successfully.', 'info');
   };
 
-  // Admin and Sub-Admin Email Authentication
-  const adminLogin = (email: string, password: string): { success: boolean; message: string; user?: User } => {
+  // Admin and Sub-Admin Database Role-Based Authentication
+  const adminLogin = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; message: string; user?: User }> => {
     const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Authenticate against Supabase database with SHA-256 encrypted verification
+    const supabaseRes = await supabaseService.adminLogin(cleanEmail, password);
+    if (supabaseRes.success && supabaseRes.user) {
+      setCurrentUser(supabaseRes.user);
+      showToast(
+        `স্বাগতম, ${supabaseRes.user.name} (${supabaseRes.user.adminRole === 'super_admin' ? 'Super Admin' : 'Sub Admin'})!`,
+        'success'
+      );
+      return supabaseRes;
+    }
+
+    // If Supabase gave an explicit error (invalid credentials / deactivated), return that message
+    if (supabaseRes.message && !supabaseRes.message.includes('admin_users')) {
+      return supabaseRes;
+    }
+
+    // 2. Fallback check for locally configured sub-admins
+    const passwordHash = await hashPassword(password);
     const account = adminAccounts.find((a) => a.email.toLowerCase() === cleanEmail);
 
-    if (!account) {
-      return { success: false, message: 'Invalid admin email address.' };
+    if (account && account.password) {
+      if (!account.isActive) {
+        return { success: false, message: 'এই এডমিন একাউন্টটি বর্তমানে নিষ্ক্রিয় (Deactivated) রয়েছে।' };
+      }
+
+      if (account.password === password || account.password === passwordHash) {
+        const adminUser: User = {
+          id: account.id,
+          name: account.name,
+          email: account.email,
+          phone: account.phone || '01711234567',
+          role: account.role === 'super_admin' ? 'admin' : 'sub_admin',
+          adminRole: account.role,
+          permissions: account.permissions,
+          defaultDistrict: 'Dhaka',
+          defaultAddress: 'Banani, Dhaka, Bangladesh'
+        };
+
+        setCurrentUser(adminUser);
+        showToast(
+          `স্বাগতম, ${adminUser.name} (${account.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'})!`,
+          'success'
+        );
+        return { success: true, message: 'Admin login successful', user: adminUser };
+      }
     }
 
-    if (!account.isActive) {
-      return { success: false, message: 'This admin account has been deactivated by Super Admin.' };
-    }
-
-    if (account.password !== password) {
-      return { success: false, message: 'Incorrect admin password.' };
-    }
-
-    const adminUser: User = {
-      id: account.id,
-      name: account.name,
-      email: account.email,
-      phone: account.phone || '01711234567',
-      role: account.role === 'super_admin' ? 'admin' : 'sub_admin',
-      adminRole: account.role,
-      permissions: account.permissions,
-      defaultDistrict: 'Dhaka',
-      defaultAddress: 'Gulshan 2, Dhaka, Bangladesh'
+    return {
+      success: false,
+      message:
+        supabaseRes.message ||
+        'ভুল ইমেইল বা পাসওয়ার্ড। শুধুমাত্র ডাটাবেজে অনুমোদিত এডমিন ইউজারগণ প্রবেশ করতে পারবেন।'
     };
-
-    setCurrentUser(adminUser);
-    showToast(
-      `Welcome, ${adminUser.name} (${account.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'})!`,
-      'success'
-    );
-    return { success: true, message: 'Admin login successful', user: adminUser };
   };
 
   // Sub Admin Management by Super Admin
-  const createSubAdmin = (payload: {
+  const createSubAdmin = async (payload: {
     name: string;
     email: string;
     password: string;
     phone?: string;
     permissions: string[];
-  }) => {
+  }): Promise<{ success: boolean; message: string }> => {
     const cleanEmail = payload.email.trim().toLowerCase();
     if (adminAccounts.some((a) => a.email.toLowerCase() === cleanEmail)) {
       return { success: false, message: 'An administrator with this email address already exists.' };
     }
 
+    // Try saving to Supabase first
+    await supabaseService.createAdminUser({
+      name: payload.name.trim(),
+      email: cleanEmail,
+      password: payload.password,
+      role: 'sub_admin',
+      phone: payload.phone?.trim(),
+      permissions: payload.permissions
+    });
+
     const newSubAdmin: AdminAccount = {
       id: `admin-sub-${Date.now()}`,
       name: payload.name.trim(),
       email: cleanEmail,
-      password: payload.password,
+      password: '', // Never store plaintext password in memory
       role: 'sub_admin',
       phone: payload.phone?.trim() || '',
       permissions: payload.permissions.length > 0 ? payload.permissions : ['orders', 'tracking'],
@@ -1164,6 +1218,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         login,
         loginWithPhone,
+        customerLogin,
+        customerRegister,
         updateUserProfile,
         logout,
 

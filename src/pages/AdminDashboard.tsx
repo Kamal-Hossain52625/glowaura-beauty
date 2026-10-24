@@ -123,10 +123,11 @@ export const AdminDashboard: React.FC = () => {
     setQuickViewProduct
   } = useStore();
 
-  const [adminEmail, setAdminEmail] = useState('admin@glowaurabd.com');
-  const [adminPassword, setAdminPassword] = useState('password123');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [adminAuthError, setAdminAuthError] = useState('');
   const [showAdminLoginPassword, setShowAdminLoginPassword] = useState(false);
+  const [isAdminLoggingIn, setIsAdminLoggingIn] = useState(false);
 
   const [activeAdminTab, setActiveAdminTab] = useState<
     'overview' | 'products' | 'orders' | 'tracking' | 'categories' | 'customers' | 'reviews' | 'coupons' | 'settings' | 'admins'
@@ -267,7 +268,7 @@ export const AdminDashboard: React.FC = () => {
     return orders[0] || null;
   }, [orders, adminSelectedOrderId, adminTrackingSearch]);
 
-  const handleAdminLoginSubmit = (e: React.FormEvent) => {
+  const handleAdminLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdminAuthError('');
     if (!adminEmail.trim()) {
@@ -278,31 +279,22 @@ export const AdminDashboard: React.FC = () => {
       setAdminAuthError('Please enter admin password.');
       return;
     }
-    const res = adminLogin(adminEmail.trim(), adminPassword);
-    if (!res.success) {
-      setAdminAuthError(res.message);
-    } else {
-      setAdminAuthError('');
+    setIsAdminLoggingIn(true);
+    try {
+      const res = await adminLogin(adminEmail.trim(), adminPassword);
+      if (!res.success) {
+        setAdminAuthError(res.message);
+      } else {
+        setAdminAuthError('');
+      }
+    } catch {
+      setAdminAuthError('Authentication error occurred.');
+    } finally {
+      setIsAdminLoggingIn(false);
     }
   };
 
-  const handleQuickFillCredentials = (email: string, pass: string) => {
-    setAdminEmail(email);
-    setAdminPassword(pass);
-    setAdminAuthError('');
-  };
-
-  const handleQuickLogin = (email: string, pass: string) => {
-    setAdminEmail(email);
-    setAdminPassword(pass);
-    setAdminAuthError('');
-    const res = adminLogin(email, pass);
-    if (!res.success) {
-      setAdminAuthError(res.message);
-    }
-  };
-
-  const handleCreateSubAdminSubmit = (e: React.FormEvent) => {
+  const handleCreateSubAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subAdminForm.name.trim() || !subAdminForm.email.trim() || !subAdminForm.password.trim()) {
       showToast('Please fill in Name, Email, and Password.', 'error');
@@ -312,7 +304,7 @@ export const AdminDashboard: React.FC = () => {
       showToast('Password must be at least 6 characters.', 'error');
       return;
     }
-    const res = createSubAdmin({
+    const res = await createSubAdmin({
       name: subAdminForm.name.trim(),
       email: subAdminForm.email.trim(),
       password: subAdminForm.password,
@@ -584,59 +576,16 @@ export const AdminDashboard: React.FC = () => {
               Admin & Staff Login
             </h1>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Administrative portal for GlowAura Beauty BD. Sign in using your registered admin email address and password.
+              Administrative portal for Ayat & Amat. Sign in using your registered admin email address and password.
             </p>
           </div>
 
-          {/* Role selection quick pills for evaluator convenience */}
-          <div className="bg-zinc-50 border border-zinc-200/80 p-4 rounded-2xl space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-zinc-700 flex items-center gap-1.5">
-                <Key className="w-3.5 h-3.5 text-[#E86A92]" />
-                Authorized Admin Credentials
-              </span>
-              <span className="text-[10px] bg-pink-100 text-[#E86A92] font-bold px-2 py-0.5 rounded-full">
-                Click to Auto-fill
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickFillCredentials('admin@glowaurabd.com', 'password123')}
-                className="text-left p-2.5 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100/70 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-zinc-900 text-xs flex items-center gap-1">
-                    <Crown className="w-3.5 h-3.5 text-amber-600" />
-                    Super Admin
-                  </span>
-                  <span className="text-[9px] bg-amber-200 text-amber-900 font-bold px-1.5 py-0.2 rounded-sm">
-                    Owner
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-600 font-mono truncate">admin@glowaurabd.com</p>
-                <p className="text-[10px] text-zinc-400">Full Access + Add Sub-Admins</p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickFillCredentials('subadmin@glowaurabd.com', 'password123')}
-                className="text-left p-2.5 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100/70 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-zinc-900 text-xs flex items-center gap-1">
-                    <Shield className="w-3.5 h-3.5 text-blue-600" />
-                    Sub-Admin
-                  </span>
-                  <span className="text-[9px] bg-blue-200 text-blue-900 font-bold px-1.5 py-0.2 rounded-sm">
-                    Staff
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-600 font-mono truncate">subadmin@glowaurabd.com</p>
-                <p className="text-[10px] text-zinc-400">Orders & Dispatch Logistics</p>
-              </button>
-            </div>
+          {/* Zero-Trust Database Authentication Notice */}
+          <div className="bg-pink-50/70 border border-pink-200/80 p-3.5 rounded-2xl flex items-start gap-2.5 text-xs text-zinc-700">
+            <ShieldCheck className="w-4 h-4 text-[#E86A92] shrink-0 mt-0.5" />
+            <p className="text-[11px] leading-relaxed text-zinc-600">
+              Zero-Trust Role-Based Authentication: Only authorized administrators configured in your Supabase database can access this control center.
+            </p>
           </div>
 
           <form onSubmit={handleAdminLoginSubmit} className="space-y-4 text-xs">
@@ -650,7 +599,7 @@ export const AdminDashboard: React.FC = () => {
                   required
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="admin@glowaurabd.com"
+                  placeholder="admin@ayatamat.com"
                   className="w-full bg-zinc-50 border border-zinc-200 pl-10 pr-4 py-3 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white text-zinc-900 font-medium"
                 />
                 <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3.5" />
@@ -662,7 +611,6 @@ export const AdminDashboard: React.FC = () => {
                 <label className="font-semibold text-zinc-700">
                   Password <span className="text-rose-500">*</span>
                 </label>
-                <span className="text-[11px] text-zinc-400">Default: password123</span>
               </div>
               <div className="relative">
                 <input
@@ -693,23 +641,24 @@ export const AdminDashboard: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-zinc-900 hover:bg-black text-white font-bold py-3.5 rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2 text-sm"
+              disabled={isAdminLoggingIn}
+              className="w-full bg-zinc-900 hover:bg-black text-white font-bold py-3.5 rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2 text-sm disabled:opacity-60"
             >
-              <LayoutDashboard className="w-4 h-4 text-[#E86A92]" />
-              <span>Sign In to Admin Center</span>
+              {isAdminLoggingIn ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#E86A92]" />
+                  <span>Verifying Credentials...</span>
+                </>
+              ) : (
+                <>
+                  <LayoutDashboard className="w-4 h-4 text-[#E86A92]" />
+                  <span>Sign In to Admin Center</span>
+                </>
+              )}
             </button>
           </form>
 
           <div className="pt-2 border-t border-zinc-100 flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('admin@glowaurabd.com', 'password123')}
-              className="w-full bg-[#E86A92] hover:bg-[#d6577e] text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <Crown className="w-3.5 h-3.5 text-amber-300" />
-              <span>Instant Enter as Super Admin</span>
-            </button>
-
             <button
               type="button"
               onClick={() => navigateTo('home')}
@@ -734,7 +683,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-lg font-bold">GlowAura BD Admin Center</h1>
+                <h1 className="font-display text-lg font-bold">Ayat & Amat Admin Center</h1>
                 {isSuperAdmin ? (
                   <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                     <Crown className="w-3 h-3 text-amber-400" />
@@ -2543,14 +2492,14 @@ export const AdminDashboard: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-display font-bold text-zinc-900 text-base">
-                            GlowAura Owner (Super Admin)
+                            Ayat & Amat Owner (Super Admin)
                           </h4>
                           <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
                             Root Super Admin
                           </span>
                         </div>
                         <p className="text-xs text-zinc-600 font-mono mt-0.5">
-                          admin@glowaurabd.com · Phone: 01711234567
+                          {currentUser?.role === 'admin' ? `${currentUser.email} · Phone: ${currentUser.phone}` : 'admin@ayatamat.com · Phone: 01711234567'}
                         </p>
                       </div>
                     </div>
@@ -2592,7 +2541,7 @@ export const AdminDashboard: React.FC = () => {
                     <div>
                       <p className="font-bold text-blue-900">Sub-Admin View-Only Mode</p>
                       <p className="text-blue-700 mt-0.5">
-                        You are logged in as a Sub-Admin ({currentUser?.name}). Only the Super Admin (admin@glowaurabd.com) has permissions to add, edit, or delete other sub-admin accounts.
+                        You are logged in as a Sub-Admin ({currentUser?.name}). Only the Super Admin has permissions to add, edit, or delete other sub-admin accounts.
                       </p>
                     </div>
                   </div>
@@ -2737,15 +2686,9 @@ export const AdminDashboard: React.FC = () => {
                             {/* Actions by Super Admin */}
                             {isSuperAdmin && (
                               <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-xs">
-                                <button
-                                  type="button"
-                                  onClick={() => handleQuickLogin(sub.email, sub.password)}
-                                  className="text-[11px] text-purple-700 hover:text-purple-900 font-semibold flex items-center gap-1 cursor-pointer hover:underline"
-                                  title="Test logging in as this sub-admin"
-                                >
-                                  <Key className="w-3 h-3" />
-                                  <span>Test Sub-Admin Sign-in</span>
-                                </button>
+                                <span className="text-[11px] text-zinc-500">
+                                  Role: <strong className="text-zinc-700 capitalize">{sub.role.replace('_', ' ')}</strong>
+                                </span>
 
                                 <button
                                   type="button"

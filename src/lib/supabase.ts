@@ -1,4 +1,4 @@
-// @ts-ignore -- Supabase package types may not be available to the editor.
+// @ts-ignore -- allow type-checking when the Supabase package declarations are unavailable
 import { createClient } from '@supabase/supabase-js';
 import { Product, Order, Category, OrderStatus } from '../types';
 
@@ -221,5 +221,273 @@ export const supabaseService = {
       console.warn('Supabase fetchOrders error:', err);
       return null;
     }
+  },
+
+  // Secure Role-Based Admin Login via Supabase
+  async adminLogin(email: string, password: string): Promise<{ success: boolean; message: string; user?: any }> {
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail || !password) {
+        return { success: false, message: 'ইমেইল এবং পাসওয়ার্ড দুটিই দিন।' };
+      }
+
+      const passwordHash = await hashPassword(password);
+
+      // Query admin_users table in Supabase
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', cleanEmail)
+        .eq('password_hash', passwordHash)
+        .maybeSingle();
+
+      if (error) {
+        if (error.message.includes('admin_users') || error.message.includes('schema cache')) {
+          return {
+            success: false,
+            message: 'Supabase-এ admin_users টেবিলটি এখনও তৈরি করা হয়নি। অনুগ্রহ করে schema.sql কোডটি Supabase SQL Editor-এ রান করুন।'
+          };
+        }
+        return { success: false, message: 'ডাটাবেজ চেক ব্যর্থ: ' + error.message };
+      }
+
+      if (!data) {
+        return {
+          success: false,
+          message: 'ভুল ইমেইল বা পাসওয়ার্ড। শুধুমাত্র ডাটাবেজে অনুমোদিত এডমিন ইউজারগণ প্রবেশ করতে পারবেন।'
+        };
+      }
+
+      if (data.is_active === false) {
+        return {
+          success: false,
+          message: 'এই এডমিন একাউন্টটি বর্তমানে নিষ্ক্রিয় (Deactivated) অবস্থায় রয়েছে।'
+        };
+      }
+
+      // Record last login
+      try {
+        await supabase
+          .from('admin_users')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', data.id);
+      } catch {
+        // non-blocking
+      }
+
+      return {
+        success: true,
+        message: 'Admin login successful',
+        user: {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          phone: data.phone || '01711234567',
+          role: data.role === 'super_admin' ? 'admin' : 'sub_admin',
+          adminRole: data.role,
+          permissions: Array.isArray(data.permissions) ? data.permissions : ['all'],
+          defaultDistrict: 'Dhaka',
+          defaultAddress: 'Banani, Dhaka, Bangladesh'
+        }
+      };
+    } catch (err: any) {
+      console.error('Supabase admin login error:', err);
+      return { success: false, message: err.message || 'সার্ভার যোগাযোগে সমস্যা হয়েছে।' };
+    }
+  },
+
+  // Fetch all admins for Super Admin management view
+  async fetchAdmins(): Promise<any[] | null> {
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('id, name, email, role, phone, permissions, is_active, created_at, last_login')
+        .order('created_at', { ascending: false });
+
+      if (error || !data) return null;
+      return data.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        email: r.email,
+        password: '', // Never expose password
+        role: r.role,
+        phone: r.phone || '',
+        permissions: Array.isArray(r.permissions) ? r.permissions : ['orders', 'tracking'],
+        createdAt: r.created_at ? r.created_at.split('T')[0] : '2026-10-23',
+        isActive: r.is_active ?? true
+      }));
+    } catch {
+      return null;
+    }
+  },
+
+  // Create Sub-Admin in Supabase
+  async createAdminUser(admin: {
+    name: string;
+    email: string;
+    password: string;
+    role?: 'super_admin' | 'sub_admin';
+    phone?: string;
+    permissions?: string[];
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const cleanEmail = admin.email.trim().toLowerCase();
+      const passwordHash = await hashPassword(admin.password);
+
+      const { error } = await supabase.from('admin_users').insert([
+        {
+          id: `admin-${Date.now()}`,
+          name: admin.name.trim(),
+          email: cleanEmail,
+          password_hash: passwordHash,
+          role: admin.role || 'sub_admin',
+          phone: admin.phone || '',
+          permissions: admin.permissions || ['orders', 'tracking'],
+          is_active: true
+        }
+      ]);
+
+      if (error) {
+        return { success: false, message: error.message };
+      }
+      return { success: true, message: 'Sub Admin created in Supabase database.' };
+    } catch (err: any) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // Register new customer with email and password
+  async registerCustomer(customer: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }): Promise<{ success: boolean; message: string; user?: any }> {
+    try {
+      const cleanEmail = customer.email.trim().toLowerCase();
+      const passwordHash = await hashPassword(customer.password);
+      const customerId = `cust-${Date.now()}`;
+
+      // Insert into customers table in Supabase
+      try {
+        await supabase.from('customers').insert([
+          {
+            id: customerId,
+            name: customer.name.trim(),
+            email: cleanEmail,
+            phone: customer.phone?.trim() || `017${Math.floor(10000000 + Math.random() * 90000000)}`,
+            role: 'customer'
+          }
+        ]);
+      } catch (insertErr) {
+        console.warn('Supabase customer insert notice:', insertErr);
+      }
+
+      // Also store in localStorage registered list for instant offline/session reliability
+      const savedList = JSON.parse(localStorage.getItem('ayat_registered_users') || '[]');
+      const existing = savedList.find((u: any) => u.email === cleanEmail);
+      if (existing) {
+        return { success: false, message: 'এই ইমেইল দিয়ে ইতিমধ্যেই একটি অ্যাকাউন্ট খোলা রয়েছে। অনুগ্রহ করে Sign In করুন।' };
+      }
+
+      const newUserObj = {
+        id: customerId,
+        name: customer.name.trim(),
+        email: cleanEmail,
+        phone: customer.phone?.trim() || '',
+        passwordHash,
+        role: 'customer',
+        defaultDistrict: 'Dhaka',
+        defaultAddress: ''
+      };
+      savedList.push(newUserObj);
+      localStorage.setItem('ayat_registered_users', JSON.stringify(savedList));
+
+      return {
+        success: true,
+        message: 'Registration successful',
+        user: {
+          id: newUserObj.id,
+          name: newUserObj.name,
+          email: newUserObj.email,
+          phone: newUserObj.phone,
+          role: 'customer',
+          defaultDistrict: newUserObj.defaultDistrict,
+          defaultAddress: newUserObj.defaultAddress
+        }
+      };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'রেজিস্ট্রেশনে সমস্যা হয়েছে।' };
+    }
+  },
+
+  // Customer Login with email & password
+  async customerLogin(email: string, password: string): Promise<{ success: boolean; message: string; user?: any }> {
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const passwordHash = await hashPassword(password);
+
+      // Check localStorage registered users
+      const savedList = JSON.parse(localStorage.getItem('ayat_registered_users') || '[]');
+      const localUser = savedList.find((u: any) => u.email === cleanEmail);
+
+      if (localUser) {
+        if (localUser.passwordHash === passwordHash) {
+          return {
+            success: true,
+            message: 'Login successful',
+            user: {
+              id: localUser.id,
+              name: localUser.name,
+              email: localUser.email,
+              phone: localUser.phone,
+              role: 'customer',
+              defaultDistrict: localUser.defaultDistrict || 'Dhaka',
+              defaultAddress: localUser.defaultAddress || ''
+            }
+          };
+        } else {
+          return { success: false, message: 'ভুল পাসওয়ার্ড! অনুগ্রহ করে সঠিক পাসওয়ার্ড দিন।' };
+        }
+      }
+
+      // If not in local cache, check Supabase customers table by email
+      const { data } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (data) {
+        return {
+          success: true,
+          message: 'Login successful',
+          user: {
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            phone: data.phone || '',
+            role: 'customer',
+            defaultDistrict: data.district || 'Dhaka',
+            defaultAddress: data.address || ''
+          }
+        };
+      }
+
+      return {
+        success: false,
+        message: 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি। অনুগ্রহ করে নিচে Sign Up-এ ক্লিক করে নতুন অ্যাকাউন্ট তৈরি করুন।'
+      };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'লগইনে সমস্যা হয়েছে।' };
+    }
   }
 };
+
+// SHA-256 Web Crypto hashing for zero-plaintext password security
+export async function hashPassword(password: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(password.trim());
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}

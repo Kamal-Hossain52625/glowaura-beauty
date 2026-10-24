@@ -154,13 +154,13 @@ export const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('admin')} className="hover:text-white transition-colors cursor-pointer text-[#E86A92]">
-                  Admin Dashboard (Track & Manage)
+                <button onClick={() => navigateTo('order-tracking')} className="hover:text-white transition-colors cursor-pointer">
+                  Order Tracking (অর্ডার ট্র্যাক)
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('laravel-code')} className="hover:text-white transition-colors cursor-pointer text-emerald-400">
-                  Laravel 12 Backend Docs
+                <button onClick={() => navigateTo('account')} className="hover:text-white transition-colors cursor-pointer">
+                  Customer Sign In
                 </button>
               </li>
             </ul>

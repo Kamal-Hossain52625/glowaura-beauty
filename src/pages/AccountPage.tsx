@@ -20,13 +20,21 @@ import {
   ShieldCheck,
   ArrowRight,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  UserPlus
 } from 'lucide-react';
 
 export const AccountPage: React.FC = () => {
   const {
     currentUser,
+    customerLogin,
+    customerRegister,
     loginWithPhone,
+    adminLogin,
     updateUserProfile,
     logout,
     orders,
@@ -42,15 +50,32 @@ export const AccountPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'orders' | 'wishlist' | 'addresses' | 'coupons'>('orders');
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
 
-  // Phone Auth State
-  const [authPhone, setAuthPhone] = useState('');
-  const [authName, setAuthName] = useState('');
-  const [otpStep, setOtpStep] = useState<'phone' | 'verify'>('phone');
-  const [generatedOtp, setGeneratedOtp] = useState('');
-  const [otpInputs, setOtpInputs] = useState(['', '', '', '']);
-  const [resendCountdown, setResendCountdown] = useState(30);
-  const [authError, setAuthError] = useState('');
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  // Authentication Mode: Customer vs Admin
+  const [authMode, setAuthMode] = useState<'customer' | 'admin'>('customer');
+
+  // Customer Authentication: 'login' vs 'signup'
+  const [customerAuthView, setCustomerAuthView] = useState<'login' | 'signup'>('login');
+  const [custEmail, setCustEmail] = useState('');
+  const [custPassword, setCustPassword] = useState('');
+  const [showCustPassword, setShowCustPassword] = useState(false);
+  const [isCustLoggingIn, setIsCustLoggingIn] = useState(false);
+  const [custAuthError, setCustAuthError] = useState('');
+
+  // Customer Sign-Up State
+  const [signupName, setSignupName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPhone, setSignupPhone] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [signupError, setSignupError] = useState('');
+
+  // Admin Auth State
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState('');
+  const [isAdminLoggingIn, setIsAdminLoggingIn] = useState(false);
 
   // Profile Edit State
   const [editName, setEditName] = useState(currentUser?.name || '');
@@ -67,83 +92,92 @@ export const AccountPage: React.FC = () => {
     }
   }, [currentUser]);
 
-  // Countdown timer for OTP
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (otpStep === 'verify' && resendCountdown > 0) {
-      timer = setTimeout(() => setResendCountdown((c) => c - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [otpStep, resendCountdown]);
-
   const customerOrders = orders.filter(
     (o) => !currentUser || o.customerPhone === currentUser.phone || o.customerName.toLowerCase() === currentUser.name.toLowerCase()
   );
 
   const wishlistProducts = products.filter((p) => wishlist.includes(p.id));
 
-  // Request OTP via Phone
-  const handleSendOtp = (e: React.FormEvent) => {
+  // Customer Login with Email & Password
+  const handleCustomerLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthError('');
+    setCustAuthError('');
 
-    const cleanedPhone = authPhone.replace(/\D/g, '');
-    if (cleanedPhone.length < 10) {
-      setAuthError('অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর লিখুন (e.g. 017XXXXXXXX)');
+    if (!custEmail.trim() || !custPassword.trim()) {
+      setCustAuthError('ইমেইল ও পাসওয়ার্ড উভয়ই পূরণ করুন।');
       return;
     }
 
-    setIsSendingOtp(true);
-    setTimeout(() => {
-      // Generate 4-digit code
-      const code = Math.floor(1000 + Math.random() * 9000).toString();
-      setGeneratedOtp(code);
-      setOtpStep('verify');
-      setResendCountdown(30);
-      setIsSendingOtp(false);
-      showToast(`📲 SMS Sent to +88 ${cleanedPhone}: Verification OTP is ${code}`, 'success');
-    }, 600);
+    setIsCustLoggingIn(true);
+    try {
+      const res = await customerLogin(custEmail.trim(), custPassword);
+      if (!res.success) {
+        setCustAuthError(res.message);
+      }
+    } catch {
+      setCustAuthError('লগইন প্রক্রিয়ায় সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsCustLoggingIn(false);
+    }
   };
 
-  // Verify OTP & Login
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  // Customer Sign-Up (Registration) with Email & Password
+  const handleCustomerSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthError('');
+    setSignupError('');
 
-    const enteredCode = otpInputs.join('');
-    if (enteredCode.length !== 4) {
-      setAuthError('অনুগ্রহ করে ৪ ডিজিটের ওটিপি কোডটি লিখুন');
+    if (!signupName.trim()) {
+      setSignupError('অনুগ্রহ করে আপনার পুরো নাম লিখুন।');
+      return;
+    }
+    if (!signupEmail.trim()) {
+      setSignupError('অনুগ্রহ করে আপনার ইমেইল অ্যাড্রেস লিখুন।');
+      return;
+    }
+    if (signupPassword.length < 6) {
+      setSignupError('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।');
+      return;
+    }
+    if (signupPassword !== signupConfirmPassword) {
+      setSignupError('পাসওয়ার্ড দুটি মেলেনি! একই পাসওয়ার্ড দিন।');
       return;
     }
 
-    if (enteredCode === generatedOtp || enteredCode === '1234') {
-      loginWithPhone(authPhone, authName || undefined);
-      setOtpStep('phone');
-      setOtpInputs(['', '', '', '']);
-    } else {
-      setAuthError('ভুল ওটিপি কোড! অনুগ্রহ করে মেসেজে পাওয়া সঠিক কোডটি দিন।');
+    setIsSigningUp(true);
+    try {
+      const res = await customerRegister({
+        name: signupName.trim(),
+        email: signupEmail.trim(),
+        password: signupPassword,
+        phone: signupPhone.trim() || undefined
+      });
+      if (!res.success) {
+        setSignupError(res.message);
+      }
+    } catch {
+      setSignupError('রেজিস্ট্রেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsSigningUp(false);
     }
   };
 
-  const handleOtpInputChange = (index: number, value: string) => {
-    if (value.length > 1) {
-      value = value.slice(-1);
-    }
-    const newInputs = [...otpInputs];
-    newInputs[index] = value;
-    setOtpInputs(newInputs);
+  // Admin login with email & password (async encrypted database verification)
+  const handleAdminLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError('');
+    setIsAdminLoggingIn(true);
 
-    // Auto-focus next input
-    if (value && index < 3) {
-      const nextInput = document.getElementById(`acc-otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otpInputs[index] && index > 0) {
-      const prevInput = document.getElementById(`acc-otp-${index - 1}`);
-      prevInput?.focus();
+    try {
+      const res = await adminLogin(adminEmail, adminPassword);
+      if (res.success) {
+        navigateTo('admin');
+      } else {
+        setAdminError(res.message || 'ভুল ইমেইল বা পাসওয়ার্ড।');
+      }
+    } catch {
+      setAdminError('লগইন প্রক্রিয়ায় সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+    } finally {
+      setIsAdminLoggingIn(false);
     }
   };
 
@@ -162,184 +196,380 @@ export const AccountPage: React.FC = () => {
     showToast(`Coupon "${code}" copied to clipboard!`, 'success');
   };
 
-  // Guest Mobile Phone Authentication View (No Email login!)
+  // Authentication View (User Login & Admin Login with Guest checkout option)
   if (!currentUser) {
     return (
-      <div className="max-w-md mx-auto px-4 py-16">
-        <div className="bg-white border border-[#F8E8EE] rounded-3xl p-8 shadow-sm space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-full bg-pink-50 text-[#E86A92] flex items-center justify-center mx-auto border border-pink-100">
-              <Phone className="w-7 h-7" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-zinc-900">
-              মোবাইল নম্বর দিয়ে সাইন ইন
-            </h1>
-            <p className="text-xs text-zinc-500">
-              {otpStep === 'phone'
-                ? 'আপনার ফোন নম্বর দিন। কোনো পাসওয়ার্ড ছাড়াই ওটিপি দিয়ে সরাসরি লগইন করুন।'
-                : `+88 ${authPhone} নম্বরে পাঠানো ৪ ডিজিটের কোডটি লিখুন`}
-            </p>
+      <div className="max-w-md mx-auto px-4 py-12 space-y-5">
+        {/* Guest Shopping Banner */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center space-y-2">
+          <div className="inline-flex items-center gap-1.5 text-emerald-800 text-xs font-bold bg-emerald-100/70 px-3 py-1 rounded-full">
+            <span>✨ লগইন ছাড়াই সরাসরি অর্ডার করুন</span>
+          </div>
+          <p className="text-xs text-emerald-900 leading-relaxed">
+            কোনো অ্যাকাউন্ট খোলা বা পাসওয়ার্ড ছাড়াই সরাসরি প্রোডাক্ট পছন্দ করে ১-ক্লিকে ক্যাশ অন ডেলিভারিতে অর্ডার করতে পারবেন।
+          </p>
+          <button
+            onClick={() => navigateTo('shop')}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            <span>সরাসরি শপিং করুন (লগইন ছাড়া)</span>
+          </button>
+        </div>
+
+        {/* Login Card */}
+        <div className="bg-white border border-[#F8E8EE] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          {/* Tabs */}
+          <div className="grid grid-cols-2 p-1 bg-zinc-100 rounded-2xl gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('customer');
+                setCustAuthError('');
+              }}
+              className={`py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                authMode === 'customer'
+                  ? 'bg-white text-zinc-900 shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-800'
+              }`}
+            >
+              <UserIcon className="w-3.5 h-3.5 text-[#E86A92]" />
+              <span>User Login</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('admin');
+                setAdminError('');
+              }}
+              className={`py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                authMode === 'admin'
+                  ? 'bg-white text-zinc-900 shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-800'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-zinc-800" />
+              <span>Admin Login</span>
+            </button>
           </div>
 
-          {authError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{authError}</span>
-            </div>
-          )}
+          {/* Customer Login / Sign-Up Form */}
+          {authMode === 'customer' ? (
+            customerAuthView === 'login' ? (
+              <form onSubmit={handleCustomerLoginSubmit} className="space-y-4">
+                <div className="text-center space-y-1">
+                  <h1 className="font-display text-xl font-bold text-zinc-900">
+                    কাস্টমার সাইন ইন
+                  </h1>
+                  <p className="text-xs text-zinc-500">
+                    আপনার ইমেইল ও পাসওয়ার্ড দিয়ে অ্যাকাউন্টে প্রবেশ করুন
+                  </p>
+                </div>
 
-          {otpStep === 'phone' ? (
-            <form onSubmit={handleSendOtp} className="space-y-4">
+                {custAuthError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{custAuthError}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    ইমেইল অ্যাড্রেস <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      required
+                      placeholder="customer@example.com"
+                      value={custEmail}
+                      onChange={(e) => setCustEmail(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 text-xs pl-9 pr-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                    />
+                    <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    পাসওয়ার্ড <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showCustPassword ? 'text' : 'password'}
+                      required
+                      placeholder="••••••••"
+                      value={custPassword}
+                      onChange={(e) => setCustPassword(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 text-xs pl-9 pr-9 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                    />
+                    <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                    <button
+                      type="button"
+                      onClick={() => setShowCustPassword(!showCustPassword)}
+                      className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-600 cursor-pointer"
+                    >
+                      {showCustPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isCustLoggingIn}
+                  className="w-full bg-[#E86A92] hover:bg-[#d6577e] text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {isCustLoggingIn ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>লগইন করা হচ্ছে...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>লগইন করুন</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                {/* Small Sign-Up prompt */}
+                <div className="pt-2 text-center border-t border-zinc-100">
+                  <p className="text-xs text-zinc-600">
+                    অ্যাকাউন্ট নেই?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomerAuthView('signup');
+                        setCustAuthError('');
+                      }}
+                      className="text-[#E86A92] font-bold hover:underline cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <span>Sign Up (নতুন অ্যাকাউন্ট খুলুন)</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </p>
+                </div>
+              </form>
+            ) : (
+              /* Customer Sign-Up Form */
+              <form onSubmit={handleCustomerSignupSubmit} className="space-y-3.5">
+                <div className="text-center space-y-1">
+                  <h1 className="font-display text-xl font-bold text-zinc-900">
+                    নতুন অ্যাকাউন্ট তৈরি করুন
+                  </h1>
+                  <p className="text-xs text-zinc-500">
+                    নাম, ইমেইল ও পাসওয়ার্ড দিয়ে রেজিস্ট্রেশন সম্পন্ন করুন
+                  </p>
+                </div>
+
+                {signupError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{signupError}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    আপনার নাম <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Maria Afrin"
+                      value={signupName}
+                      onChange={(e) => setSignupName(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 text-xs pl-9 pr-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                    />
+                    <UserIcon className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    ইমেইল অ্যাড্রেস <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      required
+                      placeholder="yourname@gmail.com"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 text-xs pl-9 pr-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                    />
+                    <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    মোবাইল নম্বর (ঐচ্ছিক)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      placeholder="017XXXXXXXX"
+                      value={signupPhone}
+                      onChange={(e) => setSignupPhone(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 text-xs pl-9 pr-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white font-mono"
+                    />
+                    <Phone className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    পাসওয়ার্ড <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showSignupPassword ? 'text' : 'password'}
+                      required
+                      placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড"
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 text-xs pl-9 pr-9 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                    />
+                    <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-600 cursor-pointer"
+                    >
+                      {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    পাসওয়ার্ড নিশ্চিত করুন <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      required
+                      placeholder="পাসওয়ার্ড পুনরায় লিখুন"
+                      value={signupConfirmPassword}
+                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 text-xs pl-9 pr-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                    />
+                    <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSigningUp}
+                  className="w-full bg-[#E86A92] hover:bg-[#d6577e] text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {isSigningUp ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>অ্যাকাউন্ট তৈরি হচ্ছে...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      <span>রেজিস্ট্রেশন করুন ও লগইন করুন</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Back to Sign-in */}
+                <div className="pt-2 text-center border-t border-zinc-100">
+                  <p className="text-xs text-zinc-600">
+                    ইতিমধ্যে অ্যাকাউন্ট আছে?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomerAuthView('login');
+                        setSignupError('');
+                      }}
+                      className="text-[#E86A92] font-bold hover:underline cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <span>Sign In (লগইন করুন)</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </p>
+                </div>
+              </form>
+            )
+          ) : (
+            /* Admin Login Form */
+            <form onSubmit={handleAdminLoginSubmit} className="space-y-4">
+              <div className="text-center space-y-1">
+                <h1 className="font-display text-xl font-bold text-zinc-900">
+                  এডমিন সাইন ইন
+                </h1>
+                <p className="text-xs text-zinc-500">
+                  স্টোর পরিচালনা, স্টক আপডেট ও অর্ডার ম্যানেজমেন্টের জন্য
+                </p>
+              </div>
+
+              {adminError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{adminError}</span>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                  আপনার নাম (নতুন কাস্টমারদের জন্য)
+                  এডমিন ইমেইল <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="text"
-                  placeholder="e.g. Maria Afrin"
-                  value={authName}
-                  onChange={(e) => setAuthName(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white"
+                  type="email"
+                  required
+                  placeholder="admin@ayatamat.com"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-xl outline-hidden focus:border-zinc-800 focus:bg-white"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                  মোবাইল নম্বর <span className="text-red-500">*</span>
+                  পাসওয়ার্ড <span className="text-red-500">*</span>
                 </label>
-                <div className="flex">
-                  <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-zinc-200 bg-zinc-100 text-zinc-600 text-xs font-mono font-bold">
-                    🇧🇩 +880
-                  </span>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="017XXXXXXXX"
-                    value={authPhone}
-                    onChange={(e) => setAuthPhone(e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-r-xl outline-hidden focus:border-[#E86A92] focus:bg-white font-mono"
-                  />
-                </div>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs px-3.5 py-2.5 rounded-xl outline-hidden focus:border-zinc-800 focus:bg-white"
+                />
               </div>
 
-              <div className="bg-pink-50/60 rounded-xl p-3 border border-pink-100 flex items-start gap-2.5">
+              <div className="bg-pink-50/60 rounded-xl p-3 border border-pink-100 flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#E86A92] shrink-0 mt-0.5" />
                 <p className="text-[11px] text-zinc-600 leading-relaxed">
-                  ইমেইল বা পাসওয়ার্ড মনে রাখার প্রয়োজন নেই। আপনার ফোন নম্বরে একটি তাৎক্ষণিক ভেরিফিকেশন এসএমএস যাবে।
+                  নিরাপত্তা প্রোটোকল: শুধুমাত্র ডাটাবেজে আপনার নির্ধারিত রোল-বেসড এডমিন অ্যাকাউন্ট দিয়ে লগইন করা যাবে।
                 </p>
               </div>
 
               <button
                 type="submit"
-                disabled={isSendingOtp}
-                className="w-full bg-[#E86A92] hover:bg-[#d6577e] text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                disabled={isAdminLoggingIn}
+                className="w-full bg-zinc-900 hover:bg-black text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                {isSendingOtp ? (
+                {isAdminLoggingIn ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>ওটিপি পাঠানো হচ্ছে...</span>
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#E86A92]" />
+                    <span>যাচাই করা হচ্ছে...</span>
                   </>
                 ) : (
                   <>
-                    <span>ওটিপি কোড পাঠান</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <LayoutDashboard className="w-4 h-4 text-[#E86A92]" />
+                    <span>এডমিন প্যানেলে লগইন করুন</span>
                   </>
                 )}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-5">
-              {/* Simulated SMS Alert Banner */}
-              <div
-                onClick={() => {
-                  if (generatedOtp) {
-                    setOtpInputs(generatedOtp.split(''));
-                  }
-                }}
-                className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-emerald-800 text-xs flex items-center justify-between cursor-pointer hover:bg-emerald-100/70 transition-colors"
-                title="Click to auto-fill OTP"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-base">📩</span>
-                  <div>
-                    <p className="font-bold">টেস্ট এসএমএস এলার্ট</p>
-                    <p className="text-[11px] text-emerald-700">
-                      ভেরিফিকেশন কোড: <strong className="font-mono text-sm underline">{generatedOtp}</strong>
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[10px] bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded-full">
-                  অটো ফিল করুন
-                </span>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-700 mb-2 text-center">
-                  ৪ ডিজিটের ওটিপি কোড লিখুন
-                </label>
-                <div className="flex justify-center gap-3">
-                  {otpInputs.map((digit, index) => (
-                    <input
-                      key={index}
-                      id={`acc-otp-${index}`}
-                      type="text"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOtpInputChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      className="w-12 h-12 text-center text-lg font-bold font-mono bg-zinc-50 border border-zinc-200 rounded-xl outline-hidden focus:border-[#E86A92] focus:bg-white focus:ring-2 focus:ring-pink-200"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOtpStep('phone');
-                    setAuthError('');
-                  }}
-                  className="text-zinc-500 hover:text-[#E86A92] underline cursor-pointer"
-                >
-                  নম্বর পরিবর্তন করুন
-                </button>
-
-                {resendCountdown > 0 ? (
-                  <span className="text-zinc-400 font-mono text-[11px]">
-                    পুনরায় পাঠান ({resendCountdown}s)
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={(e) => handleSendOtp(e)}
-                    className="text-[#E86A92] font-bold hover:underline cursor-pointer"
-                  >
-                    আবার ওটিপি পাঠান
-                  </button>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-[#E86A92] hover:bg-[#d6577e] text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>ভেরিফাই করে লগইন করুন</span>
               </button>
             </form>
           )}
-
-          <div className="pt-4 border-t border-zinc-100 text-center space-y-2">
-            <p className="text-[11px] text-zinc-500">Store Manager or Administrator?</p>
-            <button
-              onClick={() => navigateTo('admin')}
-              className="w-full bg-zinc-900 hover:bg-black text-white text-xs font-semibold py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <LayoutDashboard className="w-3.5 h-3.5 text-pink-400" />
-              <span>Go to Admin Dashboard (/admin)</span>
-            </button>
-          </div>
         </div>
       </div>
     );
