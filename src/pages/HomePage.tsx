@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
 import {
@@ -12,7 +12,9 @@ import {
   Flame,
   Tag,
   Clock,
-  Heart
+  Heart,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -30,14 +32,58 @@ export const HomePage: React.FC = () => {
 
   const heroSlides = [
     {
-      subtitle: "AYAT & AMAT LIFESTYLE & APPAREL 2026",
-      title: "Timeless Style, Authentic Heritage",
-      description: "Discover curated Men's Collection (Shirt, T-Shirt, Pant, Clock), luxury Women's Three-Piece & Sarees, and gentle organic Baby essentials.",
-      buttonText: "Shop Collections",
-      categoryTarget: "Men's Collection",
-      image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1400&q=80"
+      id: 'mens',
+      category: "Men's Collection",
+      badge: "👔 Men's Collection",
+      title: "Men's Premium Attire & Watches",
+      subtitle: "Executive Shirts, T-Shirts, Pants & Clocks",
+      image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1200&q=85",
+      accentBg: "from-blue-600/30 via-transparent to-black/60",
+      pillBg: "bg-blue-600/95 text-white"
+    },
+    {
+      id: 'womens',
+      category: "Women's Collection",
+      badge: "👗 Women's Collection",
+      title: "Women's Festive & Ethnic Fashion",
+      subtitle: "Jamdani Sarees, Three-Piece, Kurtis & Jewelry",
+      image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1200&q=85",
+      accentBg: "from-rose-600/30 via-transparent to-black/60",
+      pillBg: "bg-[#E86A92] text-white"
+    },
+    {
+      id: 'baby',
+      category: "Baby Collection",
+      badge: "🍼 Baby Collection",
+      title: "Gentle Baby Clothing & Essentials",
+      subtitle: "Organic Rompers, Suspender Sets, Toys & Clocks",
+      image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1200&q=85",
+      accentBg: "from-amber-600/30 via-transparent to-black/60",
+      pillBg: "bg-amber-600/95 text-white"
     }
   ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Continuous auto-sliding effect
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 3800);
+    return () => clearInterval(interval);
+  }, [isPaused, heroSlides.length]);
+
+  const handlePrevSlide = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const handleNextSlide = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  };
 
   return (
     <div className="space-y-16 pb-16">
@@ -48,7 +94,7 @@ export const HomePage: React.FC = () => {
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-pink-200 text-xs font-bold text-[#E86A92] shadow-xs">
-                <Sparkles className="w-3.5 h-3.5" />
+                
                 <span>NEW SEASON COLLECTION 2026</span>
               </div>
 
@@ -71,22 +117,43 @@ export const HomePage: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={() => navigateTo('shop', "Men's Collection")}
-                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                  onClick={() => {
+                    setCurrentSlide(0);
+                    navigateTo('shop', "Men's Collection");
+                  }}
+                  className={`border px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                    currentSlide === 0
+                      ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                      : 'bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-800'
+                  }`}
                 >
                   👔 Men's Collection
                 </button>
 
                 <button
-                  onClick={() => navigateTo('shop', "Women's Collection")}
-                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                  onClick={() => {
+                    setCurrentSlide(1);
+                    navigateTo('shop', "Women's Collection");
+                  }}
+                  className={`border px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                    currentSlide === 1
+                      ? 'bg-[#E86A92] text-white border-[#E86A92] shadow-sm'
+                      : 'bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-800'
+                  }`}
                 >
                   👗 Women's
                 </button>
 
                 <button
-                  onClick={() => navigateTo('shop', "Baby Collection")}
-                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-800 px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                  onClick={() => {
+                    setCurrentSlide(2);
+                    navigateTo('shop', "Baby Collection");
+                  }}
+                  className={`border px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                    currentSlide === 2
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                      : 'bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-800'
+                  }`}
                 >
                   🍼 Baby
                 </button>
@@ -105,19 +172,100 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Hero Image Card */}
+            {/* Right Hero Image Card with Continuous Auto Slider */}
             <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                <div className="aspect-4/3 sm:aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-                  <img
-                    src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1000&q=80"
-                    alt="Ayat & Amat Premium Collection"
-                    className="w-full h-full object-cover"
-                  />
+              <div
+                className="relative mx-auto max-w-md lg:max-w-none group"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+              >
+                {/* Main Slider Display */}
+                <div
+                  onClick={() => navigateTo('shop', heroSlides[currentSlide].category)}
+                  className="aspect-4/3 sm:aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white relative cursor-pointer bg-zinc-950 select-none"
+                  title="Click to view this collection"
+                >
+                  {heroSlides.map((slide, index) => (
+                    <div
+                      key={slide.id}
+                      className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                        index === currentSlide
+                          ? 'opacity-100 scale-100 z-10'
+                          : 'opacity-0 scale-105 pointer-events-none z-0'
+                      }`}
+                    >
+                      <img
+                        src={slide.image}
+                        alt={slide.title}
+                        className="w-full h-full object-cover"
+                      />
+
+                      {/* Subtle Vignette Gradient for Contrast */}
+                      <div className={`absolute inset-0 bg-gradient-to-t ${slide.accentBg}`} />
+
+                      {/* Collection Pill Badge */}
+                      <div className="absolute top-4 left-4 z-20">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-md backdrop-blur-md ${slide.pillBg}`}>
+                          {slide.badge}
+                        </span>
+                      </div>
+
+                      {/* Bottom Info Ribbon on Slide */}
+                      <div className="absolute bottom-4 left-4 right-4 z-20 text-white p-3.5 rounded-2xl bg-black/45 backdrop-blur-md border border-white/15 flex items-center justify-between gap-3 shadow-lg">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate leading-tight">{slide.title}</p>
+                          <p className="text-[11px] text-zinc-300 truncate">{slide.subtitle}</p>
+                        </div>
+                        <span className="shrink-0 bg-white/20 group-hover:bg-[#E86A92] group-hover:text-white text-white text-[10px] font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider transition-all flex items-center gap-1">
+                          Shop Now →
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Previous Slide Chevron */}
+                  <button
+                    type="button"
+                    onClick={handlePrevSlide}
+                    aria-label="Previous Slide"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-zinc-800 shadow-lg flex items-center justify-center transition-all opacity-85 group-hover:opacity-100 hover:scale-110 cursor-pointer"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+
+                  {/* Next Slide Chevron */}
+                  <button
+                    type="button"
+                    onClick={handleNextSlide}
+                    aria-label="Next Slide"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-zinc-800 shadow-lg flex items-center justify-center transition-all opacity-85 group-hover:opacity-100 hover:scale-110 cursor-pointer"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+
+                  {/* Dot / Pill Indicators */}
+                  <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+                    {heroSlides.map((slide, index) => (
+                      <button
+                        key={slide.id}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentSlide(index);
+                        }}
+                        aria-label={`Go to ${slide.category}`}
+                        className={`transition-all rounded-full cursor-pointer ${
+                          index === currentSlide
+                            ? 'w-7 h-2 bg-white shadow-md'
+                            : 'w-2 h-2 bg-white/50 hover:bg-white/80'
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
 
-                {/* Floating promo badge */}
-                <div className="absolute -bottom-4 -left-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-pink-100 flex items-center gap-3">
+                {/* Floating promo badge (Preserved original) */}
+                <div className="absolute -bottom-4 -left-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-pink-100 flex items-center gap-3 z-30 pointer-events-auto">
                   <div className="w-10 h-10 rounded-full bg-pink-100 text-[#E86A92] flex items-center justify-center font-black">
                     ৳
                   </div>
@@ -125,6 +273,12 @@ export const HomePage: React.FC = () => {
                     <p className="text-[10px] uppercase font-bold text-zinc-400">Welcome Discount</p>
                     <p className="text-sm font-bold text-zinc-900">Code: AYAT10 (10% OFF)</p>
                   </div>
+                </div>
+
+                {/* Auto Slide Counter Pill */}
+                <div className="absolute -top-3 -right-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md border border-pink-100 flex items-center gap-2 z-30 text-[11px] font-bold text-zinc-700">
+                  <span className="w-2 h-2 rounded-full bg-[#E86A92] animate-ping" />
+                  <span>{currentSlide + 1} / {heroSlides.length} ({heroSlides[currentSlide].category.split(" ")[0]})</span>
                 </div>
               </div>
             </div>

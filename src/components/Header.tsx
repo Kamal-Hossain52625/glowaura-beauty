@@ -96,6 +96,13 @@ export const Header: React.FC = () => {
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E86A92] to-[#f49cb8] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform font-display font-black text-sm tracking-wider">
               A&A
             </div>
+            {/* <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E86A92] to-[#f49cb8] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform font-display font-black text-sm tracking-wider">
+              <img
+                src="https://i.postimg.cc/1ts61BW2/Whats-App-Image-2026-10-13-at-22-32-12.jpg"
+                alt="logo"
+                className="w-full h-full object-cover w-10 h-10 rounded-2xl"
+              />
+            </div> */}
             <div>
               <span className="font-display text-xl sm:text-2xl font-black tracking-tight text-[#222222] block leading-none">
                 Ayat & Amat<span className="text-[#E86A92]">.</span>
@@ -503,7 +510,7 @@ export const Header: React.FC = () => {
               onClick={() => navigateTo('shop')}
               className="text-[#E86A92] font-bold hover:text-[#d6577e] transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer bg-pink-50/80 px-3 py-1 rounded-full border border-pink-200"
             >
-              <Sparkles className="w-3 h-3 text-[#E86A92]" />
+              
               Special Offers %
             </button>
           </div>
